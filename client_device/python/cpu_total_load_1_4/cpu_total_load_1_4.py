@@ -1,78 +1,74 @@
 import psutil
 import time
-import os
 
+from typing import List
+from collections import deque
+from utils.data_model.measurement import Measurement
 from utils.utils import new_thread
+from utils.global_constants import FREQUENCY, WINDOW_SIZE
 
 # MEMBERS
-
-DATA_FOLDER = "cpu_total_load_1_4/data"
-FREQUENCY = 1 # sec
+QUEUE_A: deque[Measurement] = deque(maxlen=WINDOW_SIZE)
+QUEUE_B: deque[Measurement] = deque(maxlen=WINDOW_SIZE)
+current_batch_id = "a"
 do_measuring = False
-writing_batch_file = ""
+waiting = False
 
 # METHODS
 
 def start_measuring():
     global do_measuring
     do_measuring = True
-    _crete_data_folder()
-    new_thread(_start_new_batch())
+    new_thread(_start_new_batch(current_batch_id, QUEUE_A))
 
 def stop_measuring():
     global do_measuring
     do_measuring = False
 
-    time.sleep(1)
-    _delete_batch_file(writing_batch_file)
+    time.sleep(FREQUENCY)
 
 def get_batch():
-    batch_to_read = writing_batch_file
-    new_thread(_start_new_batch())
-    time.sleep(1)
-    data = _read_batch_file(batch_to_read)
-    _delete_batch_file(batch_to_read)
-    return data
+    global current_batch_id
+
+    reading_queue = None
+    working_queue = None
+    if current_batch_id == "a":
+        reading_queue = QUEUE_A
+        working_queue = QUEUE_B
+        current_batch_id = "b"       
+    else:
+        reading_queue = QUEUE_B
+        working_queue = QUEUE_A
+        current_batch_id = "a"
+    
+    while waiting:
+        time.sleep(0.5)
+
+    new_thread(_start_new_batch(current_batch_id, working_queue))
+    return _read_batch(reading_queue)
     
     
 # ASSISTANT METHODS
 
-async def _start_new_batch():
-    global writing_batch_file
+async def _start_new_batch(id: str, queue: deque[Measurement]):
+    global waiting
 
-    file_path = _get_new_batch_file()
-    writing_batch_file = file_path
-    do_work = True    
-    with open(file_path, "a") as file:  # open file in append mode
-        while do_work:
-            # UTC epoch time in seconds and total cpu load in percentage
-            line = f"{_timestamp()},{_get_cpu_load()}\n"
-            file.write(line)
-            file.flush()
-            do_work = do_measuring and writing_batch_file == file_path
+    doWork = True
+    while doWork:
+        # UTC epoch time in seconds and total cpu load in percentage
+        waiting = True
+        queue.append(Measurement(_timestamp(), _get_cpu_load()))
+        waiting = False
+        doWork = do_measuring and current_batch_id == id
 
-def _crete_data_folder():
-    if not os.path.exists(DATA_FOLDER):
-        os.makedirs(DATA_FOLDER)
-
-def _get_new_batch_file():
-    return f"{DATA_FOLDER}/data_{_timestamp()}"
-
-def _delete_batch_file(file_path):
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
-def _get_cpu_load():
+def _get_cpu_load() -> float:
     return psutil.cpu_percent(interval = FREQUENCY)
 
-def _timestamp():
+def _timestamp() -> int:
     # UTC epoch time in seconds
     return int(time.time())
 
-def _read_batch_file(file_path):
-    data = []
-    with open(file_path, "r") as file:
-        for line in file:
-            timestamp, value = line.strip().split(",", 1)
-            data.append({"t": timestamp, "v": float(value)})
-    return data
+def _read_batch(queue: deque[Measurement]) -> List[Measurement]:
+    data = list(queue)
+    queue.clear()
+    return [m.__dict__ for m in data]
