@@ -16,18 +16,18 @@ waiting = False
 
 # METHODS
 
-def start_measuring_cpu():
+def start_measuring_ram():
     global do_measuring
     do_measuring = True
     new_thread(_start_new_batch(current_batch_id, QUEUE_A))
 
-def stop_measuring_cpu():
+def stop_measuring_ram():
     global do_measuring
     do_measuring = False
 
     time.sleep(FREQUENCY)
 
-def get_batch_cpu():
+def get_batch_ram():
     global current_batch_id
 
     reading_queue = None
@@ -55,14 +55,16 @@ async def _start_new_batch(id: str, queue: deque[Measurement]):
 
     doWork = True
     while doWork:
-        # UTC epoch time in seconds and total cpu load in percentage
+        # UTC epoch time in seconds and free RAM in percentage
         waiting = True
-        queue.append(Measurement(_timestamp(), _get_cpu_load()))
+        queue.append(Measurement(_timestamp(), _get_free_ram()))
+        time.sleep(FREQUENCY)
         waiting = False
         doWork = do_measuring and current_batch_id == id
 
-def _get_cpu_load() -> float:
-    return psutil.cpu_percent(interval = FREQUENCY) # thread blocking call
+def _get_free_ram() -> float:
+    mem = psutil.virtual_memory()
+    return round((mem.available / mem.total) * 100, 2)
 
 def _timestamp() -> int:
     # UTC epoch time in seconds
