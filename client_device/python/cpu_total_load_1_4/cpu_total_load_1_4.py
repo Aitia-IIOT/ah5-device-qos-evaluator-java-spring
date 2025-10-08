@@ -30,8 +30,7 @@ def get_batch_cpu(front: int) -> List[float]:
 
 async def _run():
     while do_measuring:
-        # UTC epoch time in seconds and total cpu load in percentage
-        QUEUE.append(_get_cpu_load())
+       QUEUE.append(_get_cpu_load())
 
 def _get_cpu_load() -> float:
     return psutil.cpu_percent(interval = FREQUENCY) # thread blocking call

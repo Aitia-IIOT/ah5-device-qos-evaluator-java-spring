@@ -1,0 +1,8 @@
+measurements:
+  cpu_total_load_1_4:
+    enabled: true
+  ram_used_2_1:
+    enabled: true
+  network_throughput_3_2:
+    enabled: true
+    link_address: something

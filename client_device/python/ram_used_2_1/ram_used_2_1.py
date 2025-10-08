@@ -29,10 +29,9 @@ def get_batch_ram(front: int) -> List[float]:
 
 async def _run():
     while do_measuring:
-        # UTC epoch time in seconds and free RAM in percentage
-        QUEUE.append(_get_free_ram())
+        QUEUE.append(_get_used_ram())
         time.sleep(FREQUENCY)
         
-def _get_free_ram() -> float:
+def _get_used_ram() -> float:
     mem = psutil.virtual_memory()
-    return round((mem.available / mem.total) * 100, 2)
+    return round((mem.used / mem.total) * 100, 2)
