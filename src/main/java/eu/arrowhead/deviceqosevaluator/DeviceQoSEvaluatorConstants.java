@@ -24,6 +24,17 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.deviceqosevaluator.jpa.entity";
 	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.deviceqosevaluator.jpa.repository";
 	
+	// Config related
+	
+	public static final String DEVICE_COLLECTOR_JOB_INTERVAL = "device.collector.job.interval";
+	public static final String $DEVICE_COLLECTOR_JOB_INTERVAL_WD = "${" + DEVICE_COLLECTOR_JOB_INTERVAL + ":" + DeviceQoSEvaluatorDefaults.DEVICE_COLLECTOR_JOB_INTERVAL_DEFAULT + "}";
+	
+	// API related
+	
 	public static final String HTTP_API_BASE_PATH = "/deviceqosevaluator";
 	public static final String HTTP_API_MONITOR_PATH = HTTP_API_BASE_PATH + "/monitor";
+	
+	// Quartz related
+	public static final String DEVICE_COLLECTOR_JOB = "device_collector_job";
+	public static final String DEVICE_COLLECTOR_JOB_TRIGGER = "device_collector_job_trigger";
 }

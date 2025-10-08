@@ -14,22 +14,19 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator;
+package eu.arrowhead.deviceqosevaluator.engine;
 
-import eu.arrowhead.common.Defaults;
+import org.springframework.stereotype.Service;
 
-public class DeviceQoSEvaluatorDefaults extends Defaults {
-	
+@Service
+public class DeviceCollectorEngine {
+
 	//=================================================================================================
-	// members
+	// methods
 	
-	public static final String DEVICE_COLLECTOR_JOB_INTERVAL_DEFAULT = "30"; // sec
-	
-	//=================================================================================================
-	// assistant methods
-
 	//-------------------------------------------------------------------------------------------------
-	private DeviceQoSEvaluatorDefaults() {
-		throw new UnsupportedOperationException();
+	public void refresh() {
+		// TODO
+		System.out.println("DeviceCollectorEngine.refresh() called");
 	}
 }
