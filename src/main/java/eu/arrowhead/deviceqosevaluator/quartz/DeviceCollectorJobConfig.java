@@ -17,24 +17,14 @@
 
 package eu.arrowhead.deviceqosevaluator.quartz;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.quartz.JobDetail;
-import org.quartz.SimpleTrigger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
-import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 
-import jakarta.annotation.PostConstruct;
-
 @Configuration
-@EnableAutoConfiguration
 public class DeviceCollectorJobConfig {
 
 	//=================================================================================================
@@ -43,39 +33,17 @@ public class DeviceCollectorJobConfig {
 	@Value(DeviceQoSEvaluatorConstants.$DEVICE_COLLECTOR_JOB_INTERVAL_WD)
 	private long interval;
 	
-	private final long startDelay = 3000; 
-
-	private final Logger logger = LogManager.getLogger(this.getClass());
-	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB)
-	JobDetailFactoryBean cleanerJobDetail() {
+	JobDetailFactoryBean deviceCollectorJobDetail() {
 		final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
 		jobDetailFactory.setJobClass(DeviceCollectorJob.class);
 		jobDetailFactory.setDescription("Refeshing the device table");
 		jobDetailFactory.setDurability(true);
 
 		return jobDetailFactory;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Bean(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB_TRIGGER)
-	SimpleTriggerFactoryBean cleanerTrigger(@Qualifier(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB) final JobDetail job) {
-		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-		trigger.setJobDetail(job);
-		trigger.setRepeatInterval(interval * 1000); // convert sec to milisec
-		trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-		trigger.setStartDelay(startDelay);
-
-		return trigger;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@PostConstruct
-	public void init() {
-		logger.info("Device Collector job is initialized.");
 	}
 }

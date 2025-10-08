@@ -19,6 +19,7 @@ package eu.arrowhead.deviceqosevaluator;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.Constants;
@@ -32,6 +33,9 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 
 	//=================================================================================================
 	// members
+	
+	@Value(DeviceQoSEvaluatorConstants.$DEVICE_COLLECTOR_JOB_INTERVAL_WD)
+	private long deviceCollectorJobInterval;
 
 	private SystemModel systemModel;
 
@@ -69,6 +73,12 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 		return List.of();
 	}
 
+	
+	//-------------------------------------------------------------------------------------------------
+	public long getDeviceCollectorJobInterval() {
+		return deviceCollectorJobInterval;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
