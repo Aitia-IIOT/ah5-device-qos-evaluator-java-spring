@@ -14,16 +14,20 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator;
+package eu.arrowhead.deviceqosevaluator.swagger;
 
-public class DeviceQoSEvaluatorConstants {
+import org.springframework.context.annotation.Configuration;
+
+import eu.arrowhead.common.swagger.DefaultSwaggerConfig;
+
+@Configuration
+public class SwaggerConfig extends DefaultSwaggerConfig {
 
 	//=================================================================================================
-	// members
+	// methods
 
-	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.deviceqosevaluator.jpa.entity";
-	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.deviceqosevaluator.jpa.repository";
-	
-	public static final String HTTP_API_BASE_PATH = "/deviceqosevaluator";
-	public static final String HTTP_API_MONITOR_PATH = HTTP_API_BASE_PATH + "/monitor";
+	//-------------------------------------------------------------------------------------------------
+	public SwaggerConfig() {
+		super("Arrowhead DeviceQoSEvaluator");
+	}
 }
