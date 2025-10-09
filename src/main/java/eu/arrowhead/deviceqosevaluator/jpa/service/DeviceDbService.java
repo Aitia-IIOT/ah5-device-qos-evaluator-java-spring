@@ -14,40 +14,45 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
+package eu.arrowhead.deviceqosevaluator.jpa.service;
 
-package eu.arrowhead.deviceqosevaluator.quartz;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import eu.arrowhead.deviceqosevaluator.engine.DeviceCollectorEngine;
+import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
+import eu.arrowhead.deviceqosevaluator.jpa.repository.DeviceRepository;
 
-@Component
-@DisallowConcurrentExecution
-public class DeviceCollectorJob implements Job {
-	
+@Service
+public class DeviceDbService {
+
 	//=================================================================================================
 	// members
 	
 	@Autowired
-	private DeviceCollectorEngine deviceCollectorEngine;
-
+	private DeviceRepository deviceRepo;
+	
 	private final Logger logger = LogManager.getLogger(this.getClass());
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Override
-	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.debug("DeviceCollectorJob.execute started");
+	public List<Device> findByAddresses(final Set<String> addresses) {
+		logger.debug("findByAddresses started");
 		
-		deviceCollectorEngine.refresh();
+		return deviceRepo.findAllByAddressIn(addresses);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Device create(final String address) {
+		logger.debug("create started");
+		
+		return deviceRepo.saveAndFlush(new Device(UUID.randomUUID(), address, null, false, false));
 	}
 }

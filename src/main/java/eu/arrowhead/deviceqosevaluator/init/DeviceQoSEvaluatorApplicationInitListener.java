@@ -55,6 +55,7 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customDestroy() {
 		try {
