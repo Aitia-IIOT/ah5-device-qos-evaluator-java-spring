@@ -44,7 +44,7 @@ public class DeviceCollectorJob extends QuartzJobBean {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		logger.debug("DeviceCollectorJob.execute started");
+		logger.debug("DeviceCollectorJob.executeInternal started");
 
 		try {
 			deviceCollectorEngine.refresh();

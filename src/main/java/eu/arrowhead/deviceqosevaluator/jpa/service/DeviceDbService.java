@@ -17,6 +17,7 @@
 package eu.arrowhead.deviceqosevaluator.jpa.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,6 +46,19 @@ public class DeviceDbService {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<Device> findById(final UUID id) {
+		logger.debug("findByAddresses started");
+		
+		try {			
+			return deviceRepo.findById(id);
+		} catch (final Exception ex) {
+			logger.error(ex.getMessage());
+			logger.debug(ex);
+			throw new InternalServerError("Database operation error");
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<Device> findByAddresses(final Set<String> addresses) {

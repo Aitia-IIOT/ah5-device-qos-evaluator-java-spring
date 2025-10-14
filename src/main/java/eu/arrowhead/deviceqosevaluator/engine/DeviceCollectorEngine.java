@@ -72,8 +72,8 @@ public class DeviceCollectorEngine {
 		logger.debug("refresh started");
 
 		final SystemDeviceMap systemDeviceMap = acquireSystemsAndDevices();
-		final List<Device> newOnesToMeasure = updateDatabase(systemDeviceMap);
-		startNewMeasurements(newOnesToMeasure);
+		final List<Device> newOnesToMeasureAugmented = updateDatabase(systemDeviceMap);
+		startNewAugmentedMeasurements(newOnesToMeasureAugmented);
 		cleanDatabase();
 	}
 
@@ -117,7 +117,7 @@ public class DeviceCollectorEngine {
 		logger.debug("updateDatabase started");
 		
 		
-		final List<Device> startToMeasure = new ArrayList<>();
+		final List<Device> startToMeasureAugmented = new ArrayList<>();
 		for (int i = 0; i < systemDeviceMap.getDeviceSize(); ++i) {
 			
 			// Handle devices
@@ -130,7 +130,9 @@ public class DeviceCollectorEngine {
 				final String address = selectAddress(deviceAddresses);
 				if (!Utilities.isEmpty(address)) {
 					deviceRecord = deviceDbService.create(address, systemDeviceMap.hasAugmented(i));
-					startToMeasure.add(deviceRecord);
+					if (systemDeviceMap.hasAugmented(i)) {
+						startToMeasureAugmented.add(deviceRecord);						
+					}
 				}				
 			} else {
 				// Existing device. Should be only one but shit happens...
@@ -147,9 +149,8 @@ public class DeviceCollectorEngine {
 				if (needUpdate) {
 					deviceDbService.update(deviceRecord);					
 				}
-				if (!augmentedMeasurementJobScheduler.isScheduled(deviceRecord)) {
-					logger.info("is scheduled");
-					startToMeasure.add(deviceRecord);
+				if (!augmentedMeasurementJobScheduler.isScheduled(deviceRecord)) { // TODO need to stop measuring tha ones that no longer supports augmented
+					startToMeasureAugmented.add(deviceRecord);
 				}
 			}
 			
@@ -185,7 +186,7 @@ public class DeviceCollectorEngine {
 			systemDbService.save(toSave);
 		}
 		
-		return startToMeasure;
+		return startToMeasureAugmented;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -231,7 +232,7 @@ public class DeviceCollectorEngine {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void startNewMeasurements(final List<Device> devices) throws SchedulerException {
+	private void startNewAugmentedMeasurements(final List<Device> devices) throws SchedulerException {
 		logger.debug("startNewMeasurements started");
 		
 		for (final Device device : devices) {
