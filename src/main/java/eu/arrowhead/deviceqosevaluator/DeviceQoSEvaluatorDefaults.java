@@ -25,6 +25,7 @@ public class DeviceQoSEvaluatorDefaults extends Defaults {
 	
 	public static final String DEVICE_COLLECTOR_JOB_INTERVAL_DEFAULT = "30"; // sec
 	public static final String AUGMENTED_MEASUEREMENT_JOB_INTERVAL_DEFAULT = "10"; // sec
+	public static final String CLEANING_JOB_INTERVAL_DEFAULT = "60"; // sec
 	
 	//=================================================================================================
 	// assistant methods

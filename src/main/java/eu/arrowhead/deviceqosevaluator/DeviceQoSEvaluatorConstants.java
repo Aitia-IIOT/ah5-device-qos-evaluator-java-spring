@@ -32,6 +32,9 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String AUGMENTED_MEASUREMENT_JOB_INTERVAL = "augmented.measurement.job.interval";
 	public static final String $AUGMENTED_MEASUREMENT_JOB_INTERVAL_WD = "${" + AUGMENTED_MEASUREMENT_JOB_INTERVAL + ":" + DeviceQoSEvaluatorDefaults.AUGMENTED_MEASUEREMENT_JOB_INTERVAL_DEFAULT + "}";
 	public static final int AUGMENTED_MEASUREMENT_JOB_INTERVAL_MIN_VALUE = 5; // sec
+	public static final String CLEANING_JOB_INTERVAL = "cleaning.job.interval";
+	public static final String $CLEANING_JOB_INTERVAL_WD = "${" + CLEANING_JOB_INTERVAL + ":" + DeviceQoSEvaluatorDefaults.CLEANING_JOB_INTERVAL_DEFAULT + "}";
+	public static final int CLEANING_JOB_INTERVAL_MIN_VALUE = 60; // sec
 	
 	// API related
 	
@@ -41,4 +44,6 @@ public class DeviceQoSEvaluatorConstants {
 	// Quartz related
 	public static final String DEVICE_COLLECTOR_JOB = "device_collector_job";
 	public static final String DEVICE_COLLECTOR_JOB_TRIGGER = "device_collector_job_trigger";
+	public static final String CLEANING_JOB = "cleaning_job";
+	public static final String CLEANING_JOB_TRIGGER = "cleaning_job_trigger";
 }

@@ -38,7 +38,7 @@ import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.System;
 import eu.arrowhead.deviceqosevaluator.jpa.service.DeviceDbService;
 import eu.arrowhead.deviceqosevaluator.jpa.service.SystemDbService;
-import eu.arrowhead.deviceqosevaluator.quartz.AugmentedMeasurementJobScheduler;
+import eu.arrowhead.deviceqosevaluator.quartz.scheduler.AugmentedMeasurementJobScheduler;
 import eu.arrowhead.dto.PageDTO;
 import eu.arrowhead.dto.SystemListResponseDTO;
 import eu.arrowhead.dto.SystemQueryRequestDTO;
@@ -148,6 +148,7 @@ public class DeviceCollectorEngine {
 					deviceDbService.update(deviceRecord);					
 				}
 				if (!augmentedMeasurementJobScheduler.isScheduled(deviceRecord)) {
+					logger.info("is scheduled");
 					startToMeasure.add(deviceRecord);
 				}
 			}

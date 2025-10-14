@@ -14,38 +14,28 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator.quartz;
+package eu.arrowhead.deviceqosevaluator.quartz.job;
 
-import java.util.UUID;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-public class AugmentedMeasurementJob extends QuartzJobBean {
+@DisallowConcurrentExecution
+public class CleaningJob extends QuartzJobBean {
 
 	//=================================================================================================
 	// members
-
-	private UUID deviceId;
-
-	private final Logger logger = LogManager.getLogger(this.getClass());
-
+	
 	//=================================================================================================
 	// methods
-
+	
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		logger.debug("AugmentedMeasurementJob.execute started");
-
-		System.out.println("Augmented measurement execute: " + deviceId);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public void setDeviceId(final UUID deviceId) {
-		this.deviceId = deviceId;
+		System.out.println("cleaning job..."); // TODO
+		// Set devices to inactive if no system is associated
+		// Delete inactive devices after a certain age compared to updatedAt
 	}
 }

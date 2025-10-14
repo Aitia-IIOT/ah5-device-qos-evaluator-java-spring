@@ -14,7 +14,7 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator.quartz;
+package eu.arrowhead.deviceqosevaluator.quartz.scheduler;
 
 import java.util.List;
 
@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
+import eu.arrowhead.deviceqosevaluator.quartz.job.AugmentedMeasurementJob;
 
 @Service
 public class AugmentedMeasurementJobScheduler {

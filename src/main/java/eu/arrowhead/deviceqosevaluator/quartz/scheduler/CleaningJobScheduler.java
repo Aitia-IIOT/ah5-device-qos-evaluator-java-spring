@@ -14,7 +14,7 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator.quartz;
+package eu.arrowhead.deviceqosevaluator.quartz.scheduler;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,9 +30,10 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
+import eu.arrowhead.deviceqosevaluator.quartz.job.CleaningJob;
 
 @Service
-public class DeviceCollectorJobScheduler {
+public class CleaningJobScheduler {
 
 	//=================================================================================================
 	// members
@@ -42,11 +43,11 @@ public class DeviceCollectorJobScheduler {
 
 	@Autowired
 	private Scheduler scheduler;
-	
+
 	private JobDetail jobDetail;
 	private Trigger currentTrigger;
 	private boolean jobScheduled = false;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -54,21 +55,21 @@ public class DeviceCollectorJobScheduler {
 
 	//-------------------------------------------------------------------------------------------------
 	public synchronized void start() throws SchedulerException {
-		logger.debug("DeviceCollectorJobScheduler.start started");
-		
+		logger.debug("CleaningJobScheduler.start started");
+
 		if (jobScheduled) {
 			return;
 		}
-		
-		jobDetail = JobBuilder.newJob(DeviceCollectorJob.class)
-                .withIdentity(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB)
-                .storeDurably()
-                .build();
+
+		jobDetail = JobBuilder.newJob(CleaningJob.class)
+				.withIdentity(DeviceQoSEvaluatorConstants.CLEANING_JOB)
+				.storeDurably()
+				.build();
 
 		currentTrigger = TriggerBuilder.newTrigger()
-				.withIdentity(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB_TRIGGER, "deviceJobs")
+				.withIdentity(DeviceQoSEvaluatorConstants.CLEANING_JOB_TRIGGER)
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-						.withIntervalInMilliseconds(sysInfo.getDeviceCollectorJobInterval() * 1000) // from sec to milisec
+						.withIntervalInMilliseconds(sysInfo.getCleaningJobInterval() * 1000) // from sec to milisec
 						.repeatForever())
 				.build();
 
@@ -80,8 +81,8 @@ public class DeviceCollectorJobScheduler {
 
 	//-------------------------------------------------------------------------------------------------
 	public synchronized void stop() throws SchedulerException {
-		logger.debug("DeviceCollectorJobScheduler.stop started");
-		
+		logger.debug("CleaningJobScheduler.stop started");
+
 		if (!jobScheduled) {
 			return;
 		}

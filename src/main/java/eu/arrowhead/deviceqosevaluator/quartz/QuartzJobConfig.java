@@ -24,6 +24,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import eu.arrowhead.deviceqosevaluator.quartz.job.AugmentedMeasurementJob;
+import eu.arrowhead.deviceqosevaluator.quartz.job.DeviceCollectorJob;
+
 @Configuration
 public class QuartzJobConfig {
 

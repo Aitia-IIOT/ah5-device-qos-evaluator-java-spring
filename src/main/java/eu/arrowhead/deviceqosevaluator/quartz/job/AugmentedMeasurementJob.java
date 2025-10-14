@@ -14,27 +14,22 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
+package eu.arrowhead.deviceqosevaluator.quartz.job;
 
-package eu.arrowhead.deviceqosevaluator.quartz;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import eu.arrowhead.deviceqosevaluator.engine.DeviceCollectorEngine;
-
-@DisallowConcurrentExecution
-public class DeviceCollectorJob extends QuartzJobBean {
+public class AugmentedMeasurementJob extends QuartzJobBean {
 
 	//=================================================================================================
 	// members
 
-	@Autowired
-	private DeviceCollectorEngine deviceCollectorEngine;
+	private UUID deviceId;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -44,14 +39,13 @@ public class DeviceCollectorJob extends QuartzJobBean {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		logger.debug("DeviceCollectorJob.execute started");
+		logger.debug("AugmentedMeasurementJob.execute started");
 
-		try {
-			deviceCollectorEngine.refresh();
-		} catch (final Exception ex) {
-			logger.error("Device collecting job failure");
-			logger.error(ex.getMessage());
-			logger.debug(ex);
-		}
+		System.out.println("Augmented measurement execute: " + deviceId);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void setDeviceId(final UUID deviceId) {
+		this.deviceId = deviceId;
 	}
 }
