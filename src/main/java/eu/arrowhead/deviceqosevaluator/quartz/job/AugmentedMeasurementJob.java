@@ -19,7 +19,6 @@ package eu.arrowhead.deviceqosevaluator.quartz.job;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,14 +27,9 @@ import org.apache.logging.log4j.Logger;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.common.Constants;
-import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.common.http.HttpUtilities;
 import eu.arrowhead.deviceqosevaluator.driver.AugmentedMeasurementDriver;
 import eu.arrowhead.deviceqosevaluator.dto.AugmentedMeasurementsDTO;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
@@ -48,10 +42,10 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 
 	@Autowired
 	private DeviceDbService deviceDbService;
-	
+
 	@Autowired
 	private AugmentedMeasurementDriver measurementDriver;
-	
+
 	private UUID deviceId;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
@@ -60,20 +54,25 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	public void setDeviceId(final UUID deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 		logger.debug("AugmentedMeasurementJob.executeInternal started");
 		Assert.notNull(deviceId, "device id is null");
 		System.out.println("Augmented measurement execute: " + deviceId);
-		
+
 		try {
 			final Optional<Device> optional = deviceDbService.findById(deviceId);
 			if (optional.isEmpty()) {
 				logger.error("Device not exists: " + deviceId.toString());
 				return;
-			}			
+			}
 			final Device device = optional.get();
-			
+
 			if (device.isInactive()) {
 				logger.error("Device is inactive: " + deviceId.toString());
 				return;
@@ -82,22 +81,22 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 				logger.error("Device is not supporting augmented measurements: " + deviceId.toString());
 				return;
 			}
-			
+
 			final AugmentedMeasurementsDTO response = measurementDriver.fetch(device.getAddress());
-			
+
 			for (Entry<String, List<Double>> entry : response.entrySet()) {
 				System.out.println(entry.getKey() + ": " + entry.getValue().stream().map(String::valueOf).collect(Collectors.joining(",")));
 			}
-			
+
 		} catch (final Exception ex) {
-			logger.error("Augmented measurement job failure. Device: " + deviceId.toString());
-			logger.error(ex.getMessage());
+			logger.error("Augmented measurement job failure. Device: " + deviceId.toString() + ", Error: " + ex.getMessage());
 			logger.debug(ex);
 		}
 	}
 
+	//=================================================================================================
+	// assistant methods
+
 	//-------------------------------------------------------------------------------------------------
-	public void setDeviceId(final UUID deviceId) {
-		this.deviceId = deviceId;
-	}
+
 }

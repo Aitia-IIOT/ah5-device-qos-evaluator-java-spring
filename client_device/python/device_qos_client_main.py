@@ -51,7 +51,7 @@ async def get(batch: int = Query(default=WINDOW_SIZE), oids: List[str] = Query(d
 
 def main():
     logger.info("Arrowhead DeviceQoSClient")
-    serverConfig = uvicorn.Config(app, host="0.0.0.0", port=59473)
+    serverConfig = uvicorn.Config(app, host="0.0.0.0", port=59473, timeout_keep_alive=30)
     server = uvicorn.Server(serverConfig)
     server.run()
 

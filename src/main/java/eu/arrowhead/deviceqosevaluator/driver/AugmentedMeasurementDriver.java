@@ -83,7 +83,7 @@ public class AugmentedMeasurementDriver {
 		
 		this.client = createWebClient(httpCLient);
 		long frequency = sysInfo.getAugmentedMeasurementJobInterval();
-		batchSize = frequency > deviceClientWindowSize ? String.valueOf(deviceClientWindowSize) : String.valueOf(frequency);
+		this.batchSize = frequency > deviceClientWindowSize ? String.valueOf(deviceClientWindowSize) : String.valueOf(frequency);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -98,7 +98,8 @@ public class AugmentedMeasurementDriver {
 				.builder()
 				.clientConnector(new ReactorClientHttpConnector(client))
 				.defaultHeader(HttpHeaderNames.ACCEPT.toString(), MediaType.APPLICATION_JSON_VALUE)
-				.defaultHeader(HttpHeaderNames.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE);
+				.defaultHeader(HttpHeaderNames.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE)
+				.defaultHeader(HttpHeaderNames.CONNECTION.toString(), "keep-alive");
 
 		return builder.build();
 	}
