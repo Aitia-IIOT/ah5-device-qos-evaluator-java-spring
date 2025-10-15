@@ -25,16 +25,16 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import eu.arrowhead.deviceqosevaluator.engine.DeviceCollectorEngine;
+import eu.arrowhead.deviceqosevaluator.engine.MeasurementEngine;
 
 @DisallowConcurrentExecution
-public class DeviceCollectorJob extends QuartzJobBean {
+public class MeasurementOrganizerJob extends QuartzJobBean {
 
 	//=================================================================================================
 	// members
 
 	@Autowired
-	private DeviceCollectorEngine deviceCollectorEngine;
+	private MeasurementEngine measurementEngine;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -44,12 +44,12 @@ public class DeviceCollectorJob extends QuartzJobBean {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		logger.debug("DeviceCollectorJob.executeInternal started");
+		logger.debug("MeasurementOrganizerJob.executeInternal started");
 
 		try {
-			deviceCollectorEngine.refresh();
+			measurementEngine.organize();
 		} catch (final Exception ex) {
-			logger.error("Device collecting job failure");
+			logger.error("Measurement organizer job failure");
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 		}

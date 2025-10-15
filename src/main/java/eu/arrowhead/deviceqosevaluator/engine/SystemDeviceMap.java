@@ -61,7 +61,7 @@ public class SystemDeviceMap {
 	public Set<String> getDeviceSystems(final int idx) {
 		return devices.get(idx).getMiddle();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public boolean hasAugmented(final int idx) {
 		return devices.get(idx).getRight().getValue();
@@ -106,7 +106,8 @@ public class SystemDeviceMap {
 
 		if (system.device() != null) {
 			for (final AddressDTO addr : system.device().addresses()) {
-				if (Utilities.isEnumValue(addr.type(), AddressType.class)) {
+				if (Utilities.isEnumValue(addr.type(), AddressType.class) &&
+						!addr.type().equalsIgnoreCase(AddressType.MAC.name())) {
 					addresses.add(new Address(addr.address(), AddressType.valueOf(addr.type()), true));
 				}
 			}
@@ -138,7 +139,7 @@ public class SystemDeviceMap {
 		if (Utilities.isEmpty(system.metadata()) || !system.metadata().containsKey(Constants.PROPERTY_KEY_QOS)) {
 			return false;
 		}
-		
+
 		final Object object = MetadataKeyEvaluator.getMetadataValueForCompositeKey(system.metadata(), Constants.PROPERTY_KEY_QOS + Constants.DOT + Constants.PROPERTY_KEY_DEVICE_AUGMENTED);
 		if (object != null) {
 			try {
@@ -154,7 +155,7 @@ public class SystemDeviceMap {
 				return false;
 			}
 		}
-		
+
 		return false;
 	}
 

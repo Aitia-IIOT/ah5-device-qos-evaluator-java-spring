@@ -45,7 +45,7 @@ import eu.arrowhead.dto.SystemQueryRequestDTO;
 import eu.arrowhead.dto.enums.AddressType;
 
 @Service
-public class DeviceCollectorEngine {
+public class MeasurementEngine {
 
 	//=================================================================================================
 	// members
@@ -60,6 +60,9 @@ public class DeviceCollectorEngine {
 	private SystemDbService systemDbService;
 	
 	@Autowired
+	private AugmentedMeasurementJobScheduler rttMeasurementJobScheduler;
+	
+	@Autowired
 	private AugmentedMeasurementJobScheduler augmentedMeasurementJobScheduler;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
@@ -68,12 +71,11 @@ public class DeviceCollectorEngine {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public void refresh() throws SchedulerException, ArrowheadException {
-		logger.debug("refresh started");
+	public void organize() throws SchedulerException, ArrowheadException {
+		logger.debug("organize started");
 
 		final SystemDeviceMap systemDeviceMap = acquireSystemsAndDevices();
-		final List<Device> newOnesToMeasureAugmented = updateDatabase(systemDeviceMap);
-		startNewAugmentedMeasurements(newOnesToMeasureAugmented);
+		arrangeDatabaseAndMeasurements(systemDeviceMap);
 		cleanDatabase();
 	}
 
@@ -113,11 +115,9 @@ public class DeviceCollectorEngine {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<Device> updateDatabase(final SystemDeviceMap systemDeviceMap) throws SchedulerException {
-		logger.debug("updateDatabase started");
+	private void arrangeDatabaseAndMeasurements(final SystemDeviceMap systemDeviceMap) throws SchedulerException {
+		logger.debug("arrangeDatabaseAndMeasurements started");
 		
-		
-		final List<Device> startToMeasureAugmented = new ArrayList<>();
 		for (int i = 0; i < systemDeviceMap.getDeviceSize(); ++i) {
 			
 			// Handle devices
@@ -126,17 +126,18 @@ public class DeviceCollectorEngine {
 			
 			Device deviceRecord = null;
 			if (Utilities.isEmpty(deviceRecords)) {
-				// Create new device
+				// New device
 				final String address = selectAddress(deviceAddresses);
 				if (!Utilities.isEmpty(address)) {
 					deviceRecord = deviceDbService.create(address, systemDeviceMap.hasAugmented(i));
-					if (systemDeviceMap.hasAugmented(i)) {
-						startToMeasureAugmented.add(deviceRecord);						
+					rttMeasurementJobScheduler.start(deviceRecord);
+					if (deviceRecord.isAugmented()) {
+						augmentedMeasurementJobScheduler.start(deviceRecord);						
 					}
 				}				
 			} else {
-				// Existing device. Should be only one but shit happens...
-				deviceRecord = specifyDevice(deviceRecords);
+				// Existing device
+				deviceRecord = specifyDevice(deviceRecords); // It can happen that a device was considered as multiple device before, but now the new data shows the truth
 				boolean needUpdate = false;
 				if (deviceRecord.isAugmented() != systemDeviceMap.hasAugmented(i)) {
 					deviceRecord.setAugmented(systemDeviceMap.hasAugmented(i));
@@ -149,8 +150,13 @@ public class DeviceCollectorEngine {
 				if (needUpdate) {
 					deviceDbService.update(deviceRecord);					
 				}
-				if (!augmentedMeasurementJobScheduler.isScheduled(deviceRecord)) { // TODO need to stop measuring tha ones that no longer supports augmented
-					startToMeasureAugmented.add(deviceRecord);
+				if (!rttMeasurementJobScheduler.isScheduled(deviceRecord)) {
+					rttMeasurementJobScheduler.start(deviceRecord);
+				}
+				if (deviceRecord.isAugmented() && !augmentedMeasurementJobScheduler.isScheduled(deviceRecord)) {
+					augmentedMeasurementJobScheduler.start(deviceRecord);
+				} else if (!deviceRecord.isAugmented() && augmentedMeasurementJobScheduler.isScheduled(deviceRecord)) {
+					augmentedMeasurementJobScheduler.stop(List.of(deviceRecord));
 				}
 			}
 			
@@ -173,9 +179,11 @@ public class DeviceCollectorEngine {
 				boolean systemExists = false;
 				for (final System sysRecord : systemRecords) {
 					if (sysRecord.getName().equals(sysName)) {
-						sysRecord.setDevice(deviceRecord);
 						systemExists = true;
-						toSave.add(sysRecord);
+						if (sysRecord.getDevice() == null || !sysRecord.getDevice().getId().equals(deviceRecord.getId())) {
+							sysRecord.setDevice(deviceRecord);
+							toSave.add(sysRecord);
+						}
 						break;
 					}
 				}
@@ -185,8 +193,6 @@ public class DeviceCollectorEngine {
 			}
 			systemDbService.save(toSave);
 		}
-		
-		return startToMeasureAugmented;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -197,6 +203,7 @@ public class DeviceCollectorEngine {
 		
 		for (final Address address : addresses) {
 			if (address.type() == AddressType.MAC) {
+				// not happens in theory
 				continue;
 			}
 			
@@ -220,24 +227,20 @@ public class DeviceCollectorEngine {
 		
 		if (devices.size() > 1) {
 			for (final Device device : devices) {
-				if (selected.isInactive() && !selected.isInactive()) {
+				if (selected.isInactive() && !device.isInactive()) {
 					selected = device;
-				} else if (!device.isInactive() && (selected.getCreatedAt().isAfter(device.getCreatedAt()))) {
-					selected = device;
+					
+				} else if (selected.isInactive() == device.isInactive()) {						
+					if(!selected.isAugmented() && device.isAugmented()) {	
+						selected = device;
+					} else if (selected.getCreatedAt().isAfter(device.getCreatedAt())) {
+						selected = device;
+					}
 				}
 			}
 		}
 		
 		return selected;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void startNewAugmentedMeasurements(final List<Device> devices) throws SchedulerException {
-		logger.debug("startNewMeasurements started");
-		
-		for (final Device device : devices) {
-			augmentedMeasurementJobScheduler.start(device);
-		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -25,7 +25,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import eu.arrowhead.deviceqosevaluator.quartz.job.AugmentedMeasurementJob;
-import eu.arrowhead.deviceqosevaluator.quartz.job.DeviceCollectorJob;
+import eu.arrowhead.deviceqosevaluator.quartz.job.MeasurementOrganizerJob;
+import eu.arrowhead.deviceqosevaluator.quartz.job.RttMeasurementJob;
 
 @Configuration
 public class QuartzJobConfig {
@@ -52,8 +53,15 @@ public class QuartzJobConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	DeviceCollectorJob createDeviceCollectorJob() {
-		return new DeviceCollectorJob();
+	MeasurementOrganizerJob createMeasurementOrganizerJob() {
+		return new MeasurementOrganizerJob();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	RttMeasurementJob createRttdMeasurementJob() {
+		return new RttMeasurementJob();
 	}
 
 	//-------------------------------------------------------------------------------------------------

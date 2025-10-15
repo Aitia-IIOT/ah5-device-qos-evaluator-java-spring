@@ -36,10 +36,10 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
-import eu.arrowhead.deviceqosevaluator.quartz.job.AugmentedMeasurementJob;
+import eu.arrowhead.deviceqosevaluator.quartz.job.RttMeasurementJob;
 
 @Service
-public class AugmentedMeasurementJobScheduler {
+public class RttMeasurementJobScheduler {
 
 	//=================================================================================================
 	// members
@@ -50,8 +50,8 @@ public class AugmentedMeasurementJobScheduler {
 	@Autowired
 	private Scheduler scheduler;
 
-	private static final String jobSuffix = "_job_aug";
-	private static final String triggerSuffix = "_trigger_aug";
+	private static final String jobSuffix = "_job_rtt";
+	private static final String triggerSuffix = "_trigger_rtt";
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -60,19 +60,19 @@ public class AugmentedMeasurementJobScheduler {
 
 	//-------------------------------------------------------------------------------------------------
 	public void start(final Device device) throws SchedulerException {
-		logger.debug("AugmentedMeasurementJobScheduler.start started");
+		logger.debug("RttMeasurementJobScheduler.start started");
 		Assert.notNull(device, "device is null");
 		Assert.notNull(device.getId(), "device is is null");
 
 		if (scheduler.checkExists(JobKey.jobKey(device.getId().toString() + jobSuffix))) {
-			logger.warn("AugmentedMeasurementJob for " + device.getId().toString() + " already exists");
+			logger.warn("RttMeasurementJobScheduler for " + device.getId().toString() + " already exists");
 			return;
 		}
 
 		final JobDataMap data = new JobDataMap();
 		data.put("deviceId", device.getId());
 
-		final JobDetail jobDetail = JobBuilder.newJob(AugmentedMeasurementJob.class)
+		final JobDetail jobDetail = JobBuilder.newJob(RttMeasurementJob.class)
 				.withIdentity(device.getId().toString() + jobSuffix)
 				.usingJobData(data)
 				.storeDurably()
@@ -81,7 +81,7 @@ public class AugmentedMeasurementJobScheduler {
 		final Trigger trigger = TriggerBuilder.newTrigger()
 				.withIdentity(device.getId().toString() + triggerSuffix)
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-						.withIntervalInMilliseconds(sysInfo.getAugmentedMeasurementJobInterval() * 1000) // from sec to milisec
+						.withIntervalInMilliseconds(sysInfo.getRttMeasurementJobInterval() * 1000) // from sec to milisec
 						.repeatForever())
 				.build();
 
@@ -90,7 +90,7 @@ public class AugmentedMeasurementJobScheduler {
 
 	//-------------------------------------------------------------------------------------------------
 	public void stop(List<Device> devices) throws SchedulerException {
-		logger.debug("AugmentedMeasurementJobScheduler.stop started");
+		logger.debug("RttMeasurementJobScheduler.stop started");
 		Assert.notNull(devices, "device list is null");
 
 		for (final Device device : devices) {
@@ -98,13 +98,13 @@ public class AugmentedMeasurementJobScheduler {
 			scheduler.deleteJob(JobKey.jobKey(device.getId().toString() + jobSuffix));
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public boolean isScheduled(final Device device) throws SchedulerException {
-		logger.debug("AugmentedMeasurementJobScheduler.isScheduled started");
+		logger.debug("RttMeasurementJobScheduler.isScheduled started");
 		Assert.notNull(device, "device is null");
 		Assert.notNull(device.getId(), "device is is null");
-		
+
 		return scheduler.checkExists(JobKey.jobKey(device.getId().toString() + jobSuffix));
 	}
 }

@@ -30,10 +30,10 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
-import eu.arrowhead.deviceqosevaluator.quartz.job.DeviceCollectorJob;
+import eu.arrowhead.deviceqosevaluator.quartz.job.MeasurementOrganizerJob;
 
 @Service
-public class DeviceCollectorJobScheduler {
+public class MeasurementOrganizerJobScheduler {
 
 	//=================================================================================================
 	// members
@@ -55,21 +55,21 @@ public class DeviceCollectorJobScheduler {
 
 	//-------------------------------------------------------------------------------------------------
 	public synchronized void start() throws SchedulerException {
-		logger.debug("DeviceCollectorJobScheduler.start started");
+		logger.debug("MeasurementOrganizerJobScheduler.start started");
 		
 		if (jobScheduled) {
 			return;
 		}
 		
-		jobDetail = JobBuilder.newJob(DeviceCollectorJob.class)
-                .withIdentity(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB)
+		jobDetail = JobBuilder.newJob(MeasurementOrganizerJob.class)
+                .withIdentity(DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB)
                 .storeDurably()
                 .build();
 
 		currentTrigger = TriggerBuilder.newTrigger()
-				.withIdentity(DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB_TRIGGER)
+				.withIdentity(DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_TRIGGER)
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-						.withIntervalInMilliseconds(sysInfo.getDeviceCollectorJobInterval() * 1000) // from sec to milisec
+						.withIntervalInMilliseconds(sysInfo.getMeasurementOrganizerJobInterval() * 1000) // from sec to milisec
 						.repeatForever())
 				.build();
 
@@ -81,7 +81,7 @@ public class DeviceCollectorJobScheduler {
 
 	//-------------------------------------------------------------------------------------------------
 	public synchronized void stop() throws SchedulerException {
-		logger.debug("DeviceCollectorJobScheduler.stop started");
+		logger.debug("MeasurementOrganizerJobScheduler.stop started");
 		
 		if (!jobScheduled) {
 			return;

@@ -32,7 +32,7 @@ import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.quartz.scheduler.AugmentedMeasurementJobScheduler;
 import eu.arrowhead.deviceqosevaluator.quartz.scheduler.CleaningJobScheduler;
-import eu.arrowhead.deviceqosevaluator.quartz.scheduler.DeviceCollectorJobScheduler;
+import eu.arrowhead.deviceqosevaluator.quartz.scheduler.MeasurementOrganizerJobScheduler;
 
 @Component
 public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitListener {
@@ -44,7 +44,10 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 	private DeviceQoSEvaluatorSystemInfo sysInfo;
 
 	@Autowired
-	private DeviceCollectorJobScheduler deviceCollectorJobScheduler;
+	private MeasurementOrganizerJobScheduler measurementOrganizerJobScheduler;
+	
+	@Autowired
+	private AugmentedMeasurementJobScheduler rttMeasurementJobScheduler;
 
 	@Autowired
 	private AugmentedMeasurementJobScheduler augmentedMeasurementJobScheduler;
@@ -63,13 +66,13 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 		validateConfiguration();
 
 		try {
-			deviceCollectorJobScheduler.start();
-			logger.info("Device collection job has been started");
+			measurementOrganizerJobScheduler.start();
+			logger.info("Mesaurement organizer job has been started");
 
 			cleaningJobScheduler.start();
 			logger.info("Cleaning job has been started");
 		} catch (final SchedulerException ex) {
-			logger.error("Error while scheduling device collection job");
+			logger.error("Error occured while scheduling jobs at start-up");
 			logger.debug(ex);
 			throw new ConfigurationException(ex.getMessage());
 		}
@@ -79,15 +82,16 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 	@Override
 	protected void customDestroy() {
 		try {
-			deviceCollectorJobScheduler.stop();
-			logger.info("Device collection job has been terminated");
+			measurementOrganizerJobScheduler.stop();
+			logger.info("Mesaurement organizer job has been terminated");
 
 			cleaningJobScheduler.stop();
 			logger.info("Cleaning job has been terminated");
 
-			augmentedMeasurementJobScheduler.stop(List.of()); // TODO 
+			augmentedMeasurementJobScheduler.stop(List.of()); // TODO
+			rttMeasurementJobScheduler.stop(List.of()); // TODO 
 		} catch (SchedulerException ex) {
-			logger.error("Error while terminating jobs scheduling");
+			logger.error("Error occured while terminating jobs scheduling");
 			logger.debug(ex);
 		}
 	}
@@ -97,8 +101,11 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 
 	//-------------------------------------------------------------------------------------------------
 	public void validateConfiguration() throws ConfigurationException {
-		if (sysInfo.getDeviceCollectorJobInterval() < DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB_INTERVAL_MIN_VALUE) {
-			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.DEVICE_COLLECTOR_JOB_INTERVAL_MIN_VALUE + " sec");
+		if (sysInfo.getMeasurementOrganizerJobInterval() < DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_INTERVAL_MIN_VALUE) {
+			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_INTERVAL_MIN_VALUE + " sec");
+		}
+		if (sysInfo.getRttMeasurementJobInterval() < DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL_MIN_VALUE) {
+			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL + " sec");
 		}
 		if (sysInfo.getAugmentedMeasurementJobInterval() < DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL_MIN_VALUE) {
 			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL + " sec");

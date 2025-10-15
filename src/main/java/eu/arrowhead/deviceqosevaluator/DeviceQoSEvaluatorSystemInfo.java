@@ -34,8 +34,11 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 	//=================================================================================================
 	// members
 	
-	@Value(DeviceQoSEvaluatorConstants.$DEVICE_COLLECTOR_JOB_INTERVAL_WD)
-	private long deviceCollectorJobInterval;
+	@Value(DeviceQoSEvaluatorConstants.$MEASUREMENT_ORGANIZER_JOB_INTERVAL_WD)
+	private long measurementOrganizerJobInterval;
+	
+	@Value(DeviceQoSEvaluatorConstants.$RTT_MEASUREMENT_JOB_INTERVAL_WD)
+	private long rttMeasurementJobInterval;
 	
 	@Value(DeviceQoSEvaluatorConstants.$AUGMENTED_MEASUREMENT_JOB_INTERVAL_WD)
 	private long augmentedMeasurementJobInterval;
@@ -78,13 +81,17 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 		// TODO
 		return List.of();
 	}
-
 	
 	//-------------------------------------------------------------------------------------------------
-	public long getDeviceCollectorJobInterval() {
-		return deviceCollectorJobInterval;
+	public long getMeasurementOrganizerJobInterval() {
+		return measurementOrganizerJobInterval;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public long getRttMeasurementJobInterval() {
+		return rttMeasurementJobInterval;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public long getAugmentedMeasurementJobInterval() {
 		return augmentedMeasurementJobInterval;
