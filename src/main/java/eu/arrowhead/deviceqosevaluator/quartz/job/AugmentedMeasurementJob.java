@@ -36,6 +36,7 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.Constants;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.common.http.HttpUtilities;
+import eu.arrowhead.deviceqosevaluator.driver.AugmentedMeasurementDriver;
 import eu.arrowhead.deviceqosevaluator.dto.AugmentedMeasurementsDTO;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
 import eu.arrowhead.deviceqosevaluator.jpa.service.DeviceDbService;
@@ -49,7 +50,7 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 	private DeviceDbService deviceDbService;
 	
 	@Autowired
-	private HttpService httpService;
+	private AugmentedMeasurementDriver measurementDriver;
 	
 	private UUID deviceId;
 
@@ -82,8 +83,7 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 				return;
 			}
 			
-			final UriComponents uri = HttpUtilities.createURI(Constants.HTTP, device.getAddress(), 59473, "/device-qos");
-			final AugmentedMeasurementsDTO response = httpService.sendRequest(uri, HttpMethod.GET, AugmentedMeasurementsDTO.class);
+			final AugmentedMeasurementsDTO response = measurementDriver.fetch(device.getAddress());
 			
 			for (Entry<String, List<Double>> entry : response.entrySet()) {
 				System.out.println(entry.getKey() + ": " + entry.getValue().stream().map(String::valueOf).collect(Collectors.joining(",")));
