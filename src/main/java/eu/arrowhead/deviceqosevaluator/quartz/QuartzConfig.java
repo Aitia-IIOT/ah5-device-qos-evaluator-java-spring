@@ -17,19 +17,13 @@
 
 package eu.arrowhead.deviceqosevaluator.quartz;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import eu.arrowhead.deviceqosevaluator.quartz.job.AugmentedMeasurementJob;
-import eu.arrowhead.deviceqosevaluator.quartz.job.MeasurementOrganizerJob;
-import eu.arrowhead.deviceqosevaluator.quartz.job.RttMeasurementJob;
-
 @Configuration
-public class QuartzJobConfig {
+public class QuartzConfig {
 
 	//=================================================================================================
 	// methods
@@ -48,26 +42,5 @@ public class QuartzJobConfig {
 		SchedulerFactoryBean factory = new SchedulerFactoryBean();
 		factory.setJobFactory(jobFactory);
 		return factory;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	MeasurementOrganizerJob createMeasurementOrganizerJob() {
-		return new MeasurementOrganizerJob();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	RttMeasurementJob createRttdMeasurementJob() {
-		return new RttMeasurementJob();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	AugmentedMeasurementJob createAugmentedMeasurementJob() {
-		return new AugmentedMeasurementJob();
 	}
 }

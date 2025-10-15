@@ -39,6 +39,7 @@ import eu.arrowhead.deviceqosevaluator.jpa.entity.System;
 import eu.arrowhead.deviceqosevaluator.jpa.service.DeviceDbService;
 import eu.arrowhead.deviceqosevaluator.jpa.service.SystemDbService;
 import eu.arrowhead.deviceqosevaluator.quartz.scheduler.AugmentedMeasurementJobScheduler;
+import eu.arrowhead.deviceqosevaluator.quartz.scheduler.RttMeasurementJobScheduler;
 import eu.arrowhead.dto.PageDTO;
 import eu.arrowhead.dto.SystemListResponseDTO;
 import eu.arrowhead.dto.SystemQueryRequestDTO;
@@ -60,7 +61,7 @@ public class MeasurementEngine {
 	private SystemDbService systemDbService;
 	
 	@Autowired
-	private AugmentedMeasurementJobScheduler rttMeasurementJobScheduler;
+	private RttMeasurementJobScheduler rttMeasurementJobScheduler;
 	
 	@Autowired
 	private AugmentedMeasurementJobScheduler augmentedMeasurementJobScheduler;

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `device` (
 CREATE TABLE IF NOT EXISTS `system_` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(63) NOT NULL,
-  `device_id` binary(16) NOT NULL,
+  `device_id` binary(16) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

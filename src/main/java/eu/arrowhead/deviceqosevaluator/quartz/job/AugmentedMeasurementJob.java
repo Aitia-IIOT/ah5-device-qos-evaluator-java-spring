@@ -90,7 +90,7 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 			}
 			
 		} catch (final Exception ex) {
-			logger.error("Device collecting job failure");
+			logger.error("Augmented measurement job failure. Device: " + deviceId.toString());
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 		}
