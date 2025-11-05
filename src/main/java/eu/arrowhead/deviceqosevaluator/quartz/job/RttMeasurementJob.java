@@ -24,7 +24,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		System.out.println("RttMeasurementJob runs");
+		System.out.println("RttMeasurementJob runs [NOT IMPLEMENTED]");
 		
 	}
 

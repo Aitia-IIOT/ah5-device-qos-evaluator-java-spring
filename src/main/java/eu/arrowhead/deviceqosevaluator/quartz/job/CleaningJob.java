@@ -34,7 +34,7 @@ public class CleaningJob extends QuartzJobBean {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-		System.out.println("cleaning job..."); // TODO
+		System.out.println("cleaning job started [NOT IMPLEMENTED]"); // TODO
 		// Set devices to inactive if no system is associated (also stop scheduling)
 		// Delete inactive devices after a certain age compared to updatedAt (also stop scheduling for sure)
 	}

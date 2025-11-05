@@ -16,13 +16,13 @@
  *******************************************************************************/
 package eu.arrowhead.deviceqosevaluator.quartz.job;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +38,7 @@ import eu.arrowhead.deviceqosevaluator.dto.AugmentedMeasurementsDTO;
 import eu.arrowhead.deviceqosevaluator.enums.OID;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
 import eu.arrowhead.deviceqosevaluator.jpa.service.DeviceDbService;
+import eu.arrowhead.deviceqosevaluator.jpa.service.StatDbService;
 import eu.arrowhead.deviceqosevaluator.util.Stat;
 
 public class AugmentedMeasurementJob extends QuartzJobBean {
@@ -50,6 +51,9 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 
 	@Autowired
 	private AugmentedMeasurementDriver measurementDriver;
+
+	@Autowired
+	private StatDbService statDbService;
 
 	private UUID deviceId;
 
@@ -65,10 +69,9 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+	protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("AugmentedMeasurementJob.executeInternal started");
 		Assert.notNull(deviceId, "device id is null");
-		System.out.println("Augmented measurement execute: " + deviceId);
 
 		try {
 			final Optional<Device> optional = deviceDbService.findById(deviceId);
@@ -88,10 +91,11 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 			}
 
 			final AugmentedMeasurementsDTO response = measurementDriver.fetch(device.getAddress());
+			final ZonedDateTime timestamp = Utilities.utcNow();
 			final Map<OID, List<Double>> aggregated = aggregate(response);
 
-			for (Entry<OID, List<Double>> entry : aggregated.entrySet()) {
-				System.out.println(entry.getKey() + ": " + entry.getValue().stream().map(String::valueOf).collect(Collectors.joining(",")));
+			for (final Entry<OID, List<Double>> entry : aggregated.entrySet()) {
+				statDbService.save(timestamp, entry.getKey(), deviceId, entry.getValue());
 			}
 
 		} catch (final Exception ex) {
