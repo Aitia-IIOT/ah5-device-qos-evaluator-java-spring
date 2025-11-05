@@ -39,6 +39,19 @@ CREATE TABLE IF NOT EXISTS `system_` (
   CONSTRAINT `fk_device_id` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- Statistics | Round-Trip Time
+
+CREATE TABLE IF NOT EXISTS `stat_round_trip_time` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uuid` binary(16) NOT NUll,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `minimum` double NOT NULL,
+  `maximum` double NOT NULL,
+  `mean` double NOT NULL,
+  `median` double NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Statistics | CPU Total Load
 
 CREATE TABLE IF NOT EXISTS `stat_cpu_total_load` (

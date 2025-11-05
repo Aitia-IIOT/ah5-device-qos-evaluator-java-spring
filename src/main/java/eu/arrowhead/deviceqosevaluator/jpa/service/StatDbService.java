@@ -33,14 +33,19 @@ import eu.arrowhead.common.exception.InternalServerError;
 import eu.arrowhead.deviceqosevaluator.enums.OID;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.StatCpuTotalLoad;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.StatMemoryUsed;
+import eu.arrowhead.deviceqosevaluator.jpa.entity.StatRoundTripTime;
 import eu.arrowhead.deviceqosevaluator.jpa.repository.StatCpuTotalLoadRepository;
 import eu.arrowhead.deviceqosevaluator.jpa.repository.StatMemoryUsedRepository;
+import eu.arrowhead.deviceqosevaluator.jpa.repository.StatRoundTripTimeRepository;
 
 @Service
 public class StatDbService {
 
 	//=================================================================================================
 	// members
+	
+	@Autowired
+	private StatRoundTripTimeRepository rttStatRepo;
 
 	@Autowired
 	private StatCpuTotalLoadRepository cpuStatRepo;
@@ -66,6 +71,8 @@ public class StatDbService {
 
 		try {
 			switch (oid) {
+			case RTT:
+				rttStatRepo.saveAndFlush(new StatRoundTripTime(deviceId, timestamp, data.get(0), data.get(1), data.get(2), data.get(3)));
 			case CPU_TOTAL_LOAD:
 				cpuStatRepo.saveAndFlush(new StatCpuTotalLoad(deviceId, timestamp, data.get(0), data.get(1), data.get(2), data.get(3)));
 				break;

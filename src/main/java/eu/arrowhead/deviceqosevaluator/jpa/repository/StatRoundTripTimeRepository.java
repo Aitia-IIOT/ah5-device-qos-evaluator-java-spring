@@ -14,27 +14,22 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator.enums;
+package eu.arrowhead.deviceqosevaluator.jpa.repository;
 
-public enum OID {
+import java.util.List;
+import java.util.UUID;
 
-	//=================================================================================================
-	// members
-	
-	RTT("0.0"), CPU_TOTAL_LOAD("1.4"), MEMORY_USED("2.1");
-	
-	private String value;
+import org.springframework.stereotype.Repository;
+
+import eu.arrowhead.common.jpa.RefreshableRepository;
+import eu.arrowhead.deviceqosevaluator.jpa.entity.StatRoundTripTime;
+
+@Repository
+public interface StatRoundTripTimeRepository extends RefreshableRepository<StatRoundTripTime, Long> {
 
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private OID(String value) {
-		this.value = value;
-	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getValue() {
-		return value;
-	}
+	public List<StatRoundTripTime> findAllByUuid(final UUID uuid);
 }

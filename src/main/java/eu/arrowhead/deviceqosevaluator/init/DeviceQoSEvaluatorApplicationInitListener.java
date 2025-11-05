@@ -106,10 +106,10 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_INTERVAL_MIN_VALUE + " sec");
 		}
 		if (sysInfo.getRttMeasurementJobInterval() < DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL_MIN_VALUE) {
-			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL + " sec");
+			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.RTT_MEASUREMENT_JOB_INTERVAL_MIN_VALUE + " sec");
 		}
 		if (sysInfo.getAugmentedMeasurementJobInterval() < DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL_MIN_VALUE) {
-			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL + " sec");
+			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_JOB_INTERVAL_MIN_VALUE + " sec");
 		}
 		if (sysInfo.getCleaningJobInterval() < DeviceQoSEvaluatorConstants.CLEANING_JOB_INTERVAL_MIN_VALUE) {
 			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.CLEANING_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.CLEANING_JOB_INTERVAL_MIN_VALUE + " sec");

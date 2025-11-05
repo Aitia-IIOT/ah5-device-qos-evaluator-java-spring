@@ -14,27 +14,26 @@
  *  	Arrowhead Consortia - conceptualization
  *
  *******************************************************************************/
-package eu.arrowhead.deviceqosevaluator.enums;
+package eu.arrowhead.deviceqosevaluator.jpa.entity;
 
-public enum OID {
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
-	//=================================================================================================
-	// members
-	
-	RTT("0.0"), CPU_TOTAL_LOAD("1.4"), MEMORY_USED("2.1");
-	
-	private String value;
+import eu.arrowhead.deviceqosevaluator.jpa.entity.mapped.StatEntity;
+import jakarta.persistence.Entity;
+
+@Entity
+public class StatRoundTripTime extends StatEntity {
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
-	private OID(String value) {
-		this.value = value;
+	public StatRoundTripTime() {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getValue() {
-		return value;
+	public StatRoundTripTime(final UUID uuid, final ZonedDateTime timestamp, final double minimum, final double maximum, final double mean, final double median) {
+		super(uuid, timestamp, minimum, maximum, mean, median);
 	}
 }
