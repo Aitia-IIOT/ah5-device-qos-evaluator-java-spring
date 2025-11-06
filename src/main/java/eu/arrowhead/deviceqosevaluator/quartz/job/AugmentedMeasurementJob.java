@@ -90,7 +90,13 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 				return;
 			}
 
-			final AugmentedMeasurementsDTO response = measurementDriver.fetch(device.getAddress());
+			AugmentedMeasurementsDTO response = new AugmentedMeasurementsDTO();
+			try {
+				response = measurementDriver.fetch(device.getAddress());
+			} catch (final Exception ex) {
+				logger.error("Augmented measurement fetch failure. Device: " + deviceId.toString() + ", Error: " + ex.getMessage());
+				logger.debug(ex);
+			}
 			final ZonedDateTime timestamp = Utilities.utcNow();
 			final Map<OidGroup, List<Double>> aggregated = aggregate(response);
 
@@ -114,11 +120,18 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 		final Map<OidGroup, List<Double>> results = new HashMap<>();
 
 		for (final OidGroup oidGroup : OidGroup.values()) {
-			if (values.containsKey(oidGroup.getValue()) && !Utilities.isEmpty(values.get(oidGroup.getValue()))) {
-				final double[] array = values.get(oidGroup.getValue()).stream().mapToDouble(Double::doubleValue).toArray();
-				final List<Double> aggregated = List.of(Stat.min(array), Stat.max(array), Stat.mean(array), Stat.median(array), array[array.length - 1]);
-				results.put(oidGroup, aggregated);
+			if (oidGroup == OidGroup.RTT) {
+				continue;
 			}
+			
+			if (!values.containsKey(oidGroup.getValue()) || Utilities.isEmpty(values.get(oidGroup.getValue()))) {
+				results.put(oidGroup, List.of(-1d));
+				continue;
+			}
+			
+			final double[] array = values.get(oidGroup.getValue()).stream().mapToDouble(Double::doubleValue).toArray();
+			final List<Double> aggregated = List.of(Stat.min(array), Stat.max(array), Stat.mean(array), Stat.median(array), array[array.length - 1]);
+			results.put(oidGroup, aggregated);
 		}
 
 		return results;

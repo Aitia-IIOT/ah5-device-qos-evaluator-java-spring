@@ -21,7 +21,7 @@ public enum OidGroup {
 	//=================================================================================================
 	// members
 	
-	RTT("0.0", 30000), CPU_TOTAL_LOAD("1.4", 100d), MEMORY_USED("2.1", 100d);
+	RTT("0.0", 100d), CPU_TOTAL_LOAD("1.4", 100d), MEMORY_USED("2.1", 100d);
 	
 	private final String value;
 	private final double worstStat;

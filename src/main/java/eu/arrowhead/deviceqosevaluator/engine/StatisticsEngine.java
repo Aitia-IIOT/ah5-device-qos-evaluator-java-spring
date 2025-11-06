@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
 import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.System;
@@ -51,11 +50,8 @@ public class StatisticsEngine {
 	// members
 
 	@Autowired
-	private DeviceQoSEvaluatorSystemInfo sysInfo;
-	
-	@Autowired
 	private SystemDbService sysDbService;
-	
+
 	@Autowired
 	private StatDbService statDbService;
 
@@ -65,7 +61,7 @@ public class StatisticsEngine {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public List<SystemEvalModel> evaluate(final Set<String> systemNames, final List<OidMetricModel> metrics) {
+	public List<SystemEvalModel> evaluate(final Set<String> systemNames, final List<OidMetricModel> metrics, final long timeWindow) {
 		logger.debug("evaluate started");
 
 		final Map<UUID, List<SystemEvalModel>> deviceMap = new HashMap<>(systemNames.size());
@@ -81,26 +77,26 @@ public class StatisticsEngine {
 					found = true;
 					break;
 				}
+			}
 
-				if (!found) {
-					final SystemEvalModel evalModel = new SystemEvalModel(sysName);
-					for (final OidMetricModel metric : metrics) {
-						evalModel.addNoStat(metric.getGroup());
-					}
-					unknownList.add(evalModel);
+			if (!found) {
+				final SystemEvalModel evalModel = new SystemEvalModel(sysName);
+				for (final OidMetricModel metric : metrics) {
+					evalModel.addNoStat(metric.getGroup());
 				}
+				unknownList.add(evalModel);
 			}
 		}
-		
-		final ZonedDateTime now = Utilities.utcNow();
-		final ZonedDateTime afterTimestamp = now.minusSeconds(sysInfo.getEvaluationTimeWindow());
+
+		final ZonedDateTime afterTimestamp = Utilities.utcNow().minusSeconds(timeWindow);
 
 		final List<SystemEvalModel> result = new ArrayList<>(systemNames.size());
 		for (final Entry<UUID, List<SystemEvalModel>> entry : deviceMap.entrySet()) {
 			final Set<OidGroup> noStat = new HashSet<>();
-			final double score = calculateDeviceMetrics(entry.getKey(), metrics, now, afterTimestamp, noStat);
-			entry.getValue().forEach(sys -> { 
-				sys.setScore(score); 
+			final double score = calculateDeviceMetrics(entry.getKey(), metrics, afterTimestamp, noStat);
+			entry.getValue().forEach(sys -> {
+				sys.setScore(score);
+				sys.setNoStat(noStat);
 				result.add(sys);
 			});
 		}
@@ -113,93 +109,109 @@ public class StatisticsEngine {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private double calculateDeviceMetrics(final UUID deviceId, final List<OidMetricModel> metrics, final ZonedDateTime now, final ZonedDateTime afterTimestamp, final Set<OidGroup> noStat) {
+	private double calculateDeviceMetrics(final UUID deviceId, final List<OidMetricModel> metrics, final ZonedDateTime afterTimestamp, final Set<OidGroup> noStat) {
 		logger.debug("calculateDeviceMetrics started");
-		
+
 		double score = 0;
 		for (final OidMetricModel metricModel : metrics) {
 			final List<StatEntity> data = statDbService.getByDeviceIdUntilTimestamp(metricModel.getGroup(), deviceId, afterTimestamp);
-			if (Utilities.isEmpty(data)) {
+			if (!hasData(data)) {
 				noStat.add(metricModel.getGroup());
-			} else {
-				data.sort(Comparator.comparing(StatEntity::getTimestamp)); // ascending				
 			}
-			
-			int missingData = 0;			
-			final long step = metricModel.getGroup() == OidGroup.RTT ? sysInfo.getRttMeasurementJobInterval() : sysInfo.getAugmentedMeasurementJobInterval();
-			ZonedDateTime head = !Utilities.isEmpty(data) ? data.getLast().getTimestamp().plusSeconds(step) : afterTimestamp;
-			while (!head.isAfter(now)) {
-				missingData++;
-				head = head.plusSeconds(step);
-			}
-			
+
 			for (final Entry<OidMetric, Double> metricEntry : metricModel.getMetricWeight().entrySet()) {
-				score = score + calculateMetricScore(metricEntry.getKey(), metricEntry.getValue(), data, missingData, metricModel.getGroup().getWorstStat());
+				score = score + calculateMetricScore(metricEntry.getKey(), metricEntry.getValue(), data, metricModel.getGroup().getWorstStat());
 			}
 
 		}
-		
+
 		return score;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean hasData(final List<StatEntity> data) {
+		logger.debug("hasData started");
+		
+		if (Utilities.isEmpty(data)) {
+			return false;
+		}
+		
+		for (final StatEntity stat : data) {
+			if (stat.getMean() != -1) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private double calculateMetricScore(final OidMetric metric, final Double weight, final List<StatEntity> data, final int missingData, final double worstStat) {
+	private double calculateMetricScore(final OidMetric metric, final Double weight, final List<StatEntity> data, final double worstStat) {
 		logger.debug("calculateMetricScore started");
+
+		if (Utilities.isEmpty(data)) {
+			return worstStat * weight;
+		}
 		
 		if (metric == OidMetric.CURRENT) {
-			if (missingData > 0) {
-				return worstStat * weight;				
-			}
-			return data.getLast().getCurrent() * weight;
+			data.sort(Comparator.comparing(StatEntity::getTimestamp)); // ascending
+			return getValue(metric, data.getLast(), worstStat) * weight;
 		}
-		
-		final double[] values = new double[data.size() + missingData];
+
+		final double[] values = new double[data.size()];
 		for (int i = 0; i < values.length; ++i) {
-			values[i] = getValue(metric, data, i, worstStat);			
+			values[i] = getValue(metric, data.get(i), worstStat);
 		}
-		
+
 		switch (metric) {
 		case MIN:
 			return Stat.min(values) * weight;
-			
+
 		case MAX:
 			return Stat.max(values) * weight;
-			
+
 		case MEAN:
 			return Stat.mean(values) * weight;
-			
+
 		case MEDIAN:
 			return Stat.median(values) * weight;
-			
+
 		default:
 			logger.error("Unhandled OID metric: " + metric);
 			return 0;
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
-	private double getValue(final OidMetric metric, final List<StatEntity> data, final int idx, final double worstStat) {
+	private double getValue(final OidMetric metric, final StatEntity stat, final double worstStat) {
 		logger.debug("getValue started");
-		
-		if (idx > data.size() - 1) {
-			return worstStat;
-		}
-		
+
+		double value = -1d;
 		switch (metric) {
 		case MIN:
-			return data.get(idx).getMinimum();
-			
+			value = stat.getMinimum();
+			break;
+
 		case MAX:
-			return data.get(idx).getMaximum();
-			
+			value = stat.getMaximum();
+			break;
+
 		case MEAN:
-			return data.get(idx).getMean();
-			
+			value = stat.getMean();
+			break;
+
 		case MEDIAN:
-			return data.get(idx).getMedian();
-			
-		default:
-			return worstStat;
+			value = stat.getMedian();
+			break;
+
+		case CURRENT:
+			value = stat.getCurrent();
+			break;
 		}
+
+		if (value == -1) {
+			value = worstStat;
+		}
+		return value;
 	}
 }
