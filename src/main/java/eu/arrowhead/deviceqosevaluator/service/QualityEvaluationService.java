@@ -37,6 +37,7 @@ import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
 import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
 import eu.arrowhead.deviceqosevaluator.service.model.OidMetricModel;
 import eu.arrowhead.deviceqosevaluator.service.model.SystemEvalModel;
+import eu.arrowhead.deviceqosevaluator.service.validation.QualitiyEvaluationValidation;
 import eu.arrowhead.dto.QoSEvaluationFilterResponseDTO;
 import eu.arrowhead.dto.QoSEvaluationRequestDTO;
 import eu.arrowhead.dto.QoSEvaluationSortResponseDTO;
@@ -51,6 +52,9 @@ public class QualityEvaluationService {
 	private DeviceQoSEvaluatorSystemInfo sysInfo;
 	
 	@Autowired
+	private QualitiyEvaluationValidation validator;
+	
+	@Autowired
 	private StatisticsEngine statEngine;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
@@ -62,8 +66,7 @@ public class QualityEvaluationService {
 	public QoSEvaluationFilterResponseDTO filter(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("filter started");
 
-		// TODO validate and normalize		
-		final QoSEvaluationRequestDTO normalized = dto;
+		final QoSEvaluationRequestDTO normalized = validator.validateAndNormalizeQoSEvaluationRequest(dto, true, origin);
 		
 		final List<SystemEvalModel> evaluated = evaluateRequest(normalized);
 		final List<String> passedProviders = new ArrayList<>();
@@ -89,8 +92,7 @@ public class QualityEvaluationService {
 	public QoSEvaluationSortResponseDTO sort(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("sort started");
 
-		// TODO validate and normalize		
-		final QoSEvaluationRequestDTO normalized = dto;
+		final QoSEvaluationRequestDTO normalized = validator.validateAndNormalizeQoSEvaluationRequest(dto, false, origin);
 		
 		final List<SystemEvalModel> evaluated = evaluateRequest(normalized);
 		final List<String> sortedProviders = new ArrayList<>();
@@ -125,7 +127,7 @@ public class QualityEvaluationService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OidMetricModel> parseMetricModels(List<String> metricNames, List<Double> metricWeights) {
+	private List<OidMetricModel> parseMetricModels(final List<String> metricNames, final List<Double> metricWeights) {
 		logger.debug("parseMetricModels started");
 		
 		final Map<OidGroup, OidMetricModel> metricModels = new HashMap<>();
