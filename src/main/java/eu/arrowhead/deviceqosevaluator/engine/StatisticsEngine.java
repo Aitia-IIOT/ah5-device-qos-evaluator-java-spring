@@ -164,10 +164,10 @@ public class StatisticsEngine {
 		}
 
 		switch (metric) {
-		case MIN:
+		case MINIMUM:
 			return Stat.min(values) * weight;
 
-		case MAX:
+		case MAXIMUM:
 			return Stat.max(values) * weight;
 
 		case MEAN:
@@ -188,11 +188,11 @@ public class StatisticsEngine {
 
 		double value = -1d;
 		switch (metric) {
-		case MIN:
+		case MINIMUM:
 			value = stat.getMinimum();
 			break;
 
-		case MAX:
+		case MAXIMUM:
 			value = stat.getMaximum();
 			break;
 

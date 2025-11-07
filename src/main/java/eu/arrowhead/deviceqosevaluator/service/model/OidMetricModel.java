@@ -1,5 +1,6 @@
 package eu.arrowhead.deviceqosevaluator.service.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
@@ -12,16 +13,15 @@ public class OidMetricModel {
 	
 	private final OidGroup group;
 	
-	private final Map<OidMetric, Double> metricWeight;
+	private final Map<OidMetric, Double> metricWeight = new HashMap<>();
 
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public OidMetricModel(final OidGroup group, final Map<OidMetric, Double> metricWeight) {
+	public OidMetricModel(final OidGroup group) {
 		this.group = group;
-		this.metricWeight = metricWeight;
 	}
 
 	//-------------------------------------------------------------------------------------------------

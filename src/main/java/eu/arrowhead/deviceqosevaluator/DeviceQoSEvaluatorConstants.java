@@ -24,6 +24,8 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.deviceqosevaluator.jpa.entity";
 	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.deviceqosevaluator.jpa.repository";
 	
+	public static final String OID_NAME_DELIMITER = "_";
+	
 	// Config related
 	
 	public static final String MEASUREMENT_ORGANIZER_JOB_INTERVAL = "measurement.organizer.job.interval";
@@ -45,6 +47,10 @@ public class DeviceQoSEvaluatorConstants {
 	
 	public static final String HTTP_API_BASE_PATH = "/deviceqosevaluator";
 	public static final String HTTP_API_MONITOR_PATH = HTTP_API_BASE_PATH + "/monitor";
+	public static final String HTTP_API_QUALITY_EVALUATION_PATH = HTTP_API_BASE_PATH + "/qualityevaluation";
+
+	public static final String HTTP_API_OP_FILTER_PATH = "/filter";
+	public static final String HTTP_API_OP_SORT_PATH = "/sort";
 	
 	// Quartz related
 	public static final String MEASUREMENT_ORGANIZER_JOB = "measurement_organizer_job";

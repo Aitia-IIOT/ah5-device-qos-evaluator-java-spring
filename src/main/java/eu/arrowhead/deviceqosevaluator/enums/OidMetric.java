@@ -21,7 +21,7 @@ public enum OidMetric {
 	//=================================================================================================
 	// members
 	
-	MIN("1"), MAX("2"), MEAN("3"), MEDIAN("4"), CURRENT("5");
+	MINIMUM("1"), MAXIMUM("2"), MEAN("3"), MEDIAN("4"), CURRENT("5");
 	
 	private String value;
 
