@@ -16,6 +16,8 @@
  *******************************************************************************/
 package eu.arrowhead.deviceqosevaluator;
 
+import java.util.List;
+
 public class DeviceQoSEvaluatorConstants {
 
 	//=================================================================================================
@@ -27,6 +29,8 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String OID_NAME_DELIMITER = "_";
 	
 	public static final String VERSION_QUALITY_EVALUATION = "1.0.0";
+	
+	public static final List<Double> NO_MEASUREMENT_VALUES = List.of(-1d, -1d, -1d, -1d, -1d);
 	
 	// Config related
 	
@@ -50,9 +54,11 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String HTTP_API_BASE_PATH = "/deviceqosevaluator";
 	public static final String HTTP_API_MONITOR_PATH = HTTP_API_BASE_PATH + "/monitor";
 	public static final String HTTP_API_QUALITY_EVALUATION_PATH = HTTP_API_BASE_PATH + "/qualityevaluation";
+	public static final String HTTP_API_DEVICE_QUALITY_DATA_MANAGEMENT_PATH = HTTP_API_BASE_PATH + "/devicequalitydatamanagement";
 
 	public static final String HTTP_API_OP_FILTER_PATH = "/filter";
 	public static final String HTTP_API_OP_SORT_PATH = "/sort";
+	public static final String HTTP_API_OP_RELOAD_PATH = "/reload";
 	
 	public static final String MQTT_API_BASE_TOPIC_PREFIX = "arrowhead/deviceqosevaluator";
 	public static final String MQTT_API_MONITOR_BASE_TOPIC = MQTT_API_BASE_TOPIC_PREFIX + "/monitor/";

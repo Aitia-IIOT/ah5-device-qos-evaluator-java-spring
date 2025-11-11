@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -65,6 +66,8 @@ public class MeasurementEngine {
 	
 	@Autowired
 	private AugmentedMeasurementJobScheduler augmentedMeasurementJobScheduler;
+	
+	private boolean working = false;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -72,12 +75,19 @@ public class MeasurementEngine {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public void organize() throws SchedulerException, ArrowheadException {
+	public Pair<Integer, Integer> organize() throws SchedulerException, ArrowheadException {
 		logger.debug("organize started");
+		
+		if (working) {
+			return null;
+		}
 
+		working = true;
 		final SystemDeviceMap systemDeviceMap = acquireSystemsAndDevices();
-		arrangeDatabaseAndMeasurements(systemDeviceMap);
-		cleanDatabase();
+		final int newSysCnt = arrangeDatabaseAndMeasurements(systemDeviceMap);
+		final int removedSysCnt = cleanDatabase();
+		working = false;
+		return Pair.of(newSysCnt, removedSysCnt);
 	}
 
 	//=================================================================================================
@@ -116,9 +126,10 @@ public class MeasurementEngine {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void arrangeDatabaseAndMeasurements(final SystemDeviceMap systemDeviceMap) throws SchedulerException {
+	private int arrangeDatabaseAndMeasurements(final SystemDeviceMap systemDeviceMap) throws SchedulerException {
 		logger.debug("arrangeDatabaseAndMeasurements started");
 		
+		int newSysCnt = 0;
 		for (int i = 0; i < systemDeviceMap.getDeviceSize(); ++i) {
 			
 			// Handle devices
@@ -190,10 +201,13 @@ public class MeasurementEngine {
 				}
 				if (!systemExists) {
 					toSave.add(new System(sysName, deviceRecord));
+					newSysCnt++;
 				}
 			}
 			systemDbService.save(toSave);
 		}
+		
+		return newSysCnt;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -245,10 +259,10 @@ public class MeasurementEngine {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void cleanDatabase() {
+	private int cleanDatabase() {
 		logger.debug("cleanDatabase started");
 		
-		systemDbService.deleteSystemsWithoutDevice();
+		return systemDbService.deleteSystemsWithoutDevice();
 	}
 
 }

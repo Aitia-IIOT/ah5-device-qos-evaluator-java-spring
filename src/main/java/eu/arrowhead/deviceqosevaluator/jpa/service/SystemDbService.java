@@ -97,12 +97,14 @@ public class SystemDbService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void deleteSystemsWithoutDevice() {
+	public int deleteSystemsWithoutDevice() {
 		logger.debug("deleteSystemsWithoutDevice started");
 		
 		try {
-			systemRepo.deleteAllByDeviceIsNull();
+			final List<System> systems = systemRepo.findAllByDeviceIsNull();
+			systemRepo.deleteAllByNameIn(systems.stream().map(s -> s.getName()).toList());
 			systemRepo.flush();
+			return systems.size();
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);

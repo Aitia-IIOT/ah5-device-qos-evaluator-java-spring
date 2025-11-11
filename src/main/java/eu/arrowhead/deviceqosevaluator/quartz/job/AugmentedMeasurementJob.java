@@ -33,6 +33,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.driver.AugmentedMeasurementDriver;
 import eu.arrowhead.deviceqosevaluator.dto.AugmentedMeasurementsDTO;
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
@@ -123,12 +124,12 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 			if (oidGroup == OidGroup.RTT) {
 				continue;
 			}
-			
+
 			if (!values.containsKey(oidGroup.getValue()) || Utilities.isEmpty(values.get(oidGroup.getValue()))) {
-				results.put(oidGroup, List.of(-1d));
+				results.put(oidGroup, DeviceQoSEvaluatorConstants.NO_MEASUREMENT_VALUES);
 				continue;
 			}
-			
+
 			final double[] array = values.get(oidGroup.getValue()).stream().mapToDouble(Double::doubleValue).toArray();
 			final List<Double> aggregated = List.of(Stat.min(array), Stat.max(array), Stat.mean(array), Stat.median(array), array[array.length - 1]);
 			results.put(oidGroup, aggregated);

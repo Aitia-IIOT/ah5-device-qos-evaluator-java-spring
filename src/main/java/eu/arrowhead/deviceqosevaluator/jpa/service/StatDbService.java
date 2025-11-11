@@ -69,7 +69,7 @@ public class StatDbService {
 		Assert.notNull(deviceId, "deviceId is null");
 		Assert.isTrue(!Utilities.isEmpty(data), "data is empty");
 		Assert.isTrue(!Utilities.containsNull(data), "data contains null element");
-		Assert.isTrue(data.size() == 4, "data list has invalid size");
+		Assert.isTrue(data.size() == 5, "data list has invalid size");
 
 		try {
 			switch (oidGroup) {
