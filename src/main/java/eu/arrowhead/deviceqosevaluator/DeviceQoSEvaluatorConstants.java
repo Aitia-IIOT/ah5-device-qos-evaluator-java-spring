@@ -26,6 +26,8 @@ public class DeviceQoSEvaluatorConstants {
 	
 	public static final String OID_NAME_DELIMITER = "_";
 	
+	public static final String VERSION_QUALITY_EVALUATION = "1.0.0";
+	
 	// Config related
 	
 	public static final String MEASUREMENT_ORGANIZER_JOB_INTERVAL = "measurement.organizer.job.interval";
@@ -51,6 +53,10 @@ public class DeviceQoSEvaluatorConstants {
 
 	public static final String HTTP_API_OP_FILTER_PATH = "/filter";
 	public static final String HTTP_API_OP_SORT_PATH = "/sort";
+	
+	public static final String MQTT_API_BASE_TOPIC_PREFIX = "arrowhead/deviceqosevaluator";
+	public static final String MQTT_API_MONITOR_BASE_TOPIC = MQTT_API_BASE_TOPIC_PREFIX + "/monitor/";
+	public static final String MQTT_API_QUALITY_EVALUATION_BASE_TOPIC = MQTT_API_BASE_TOPIC_PREFIX + "/qualityevaluation/";
 	
 	// Quartz related
 	public static final String MEASUREMENT_ORGANIZER_JOB = "measurement_organizer_job";
