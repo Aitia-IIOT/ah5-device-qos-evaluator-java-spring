@@ -58,6 +58,7 @@ public class DeviceQoSEvaluatorConstants {
 
 	public static final String HTTP_API_OP_FILTER_PATH = "/filter";
 	public static final String HTTP_API_OP_SORT_PATH = "/sort";
+	public static final String HTTP_API_OP_QUERY_PATH = "/query";
 	public static final String HTTP_API_OP_RELOAD_PATH = "/reload";
 	
 	public static final String MQTT_API_BASE_TOPIC_PREFIX = "arrowhead/deviceqosevaluator";

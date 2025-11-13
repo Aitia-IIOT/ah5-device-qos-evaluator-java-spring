@@ -31,6 +31,7 @@ import eu.arrowhead.common.service.validation.name.SystemNameValidator;
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
 import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.mapped.StatEntity;
+import eu.arrowhead.deviceqosevaluator.service.normalization.DeviceQualityDataManagementNormalization;
 import eu.arrowhead.dto.QoSDeviceStatQueryRequestDTO;
 
 @Service
@@ -44,6 +45,9 @@ public class DeviceQualityDataManagementValidation {
 	
 	@Autowired
 	private SystemNameValidator sysNameValidator;
+	
+	@Autowired
+	private DeviceQualityDataManagementNormalization normalizer; 
 	
 	private final Logger logger = LogManager.getLogger(this.getClass());
 	
@@ -74,7 +78,7 @@ public class DeviceQualityDataManagementValidation {
 		logger.debug("validateAndNormalizeQueryRequest");
 		
 		validateQueryRequest(dto, origin);
-		final QoSDeviceStatQueryRequestDTO normalized = dto; // TODO
+		final QoSDeviceStatQueryRequestDTO normalized = normalizer.normalizeQoSDeviceStatQueryRequestDTO(dto);
 		
 		if (!Utilities.isEnumValue(normalized.metricGroup(), OidGroup.class)) {
 			throw new InvalidParameterException("Invalid metricGroup: " + normalized.metricGroup(), origin);
