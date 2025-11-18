@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,6 +55,9 @@ public class RttMeasurementJob extends QuartzJobBean {
 
 	private UUID deviceId;
 
+	private static final int MIN_TEST_PORT = 49152;
+	private static final int MAX_TEST_PORT = 65535;
+	
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -83,7 +87,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 				return;
 			}
 
-			double[] results = new double[10];
+			final double[] results = new double[10];
 			boolean timeout = false;
 			for (int i = 0; i < results.length; ++i) {
 				results[i] = doMeasurement(device);
@@ -133,7 +137,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 
 	//-------------------------------------------------------------------------------------------------
 	private int randomPort() {
-		return 45530; // TODO
+		return ThreadLocalRandom.current().nextInt(MIN_TEST_PORT, MAX_TEST_PORT + 1);
 	}
 
 }
