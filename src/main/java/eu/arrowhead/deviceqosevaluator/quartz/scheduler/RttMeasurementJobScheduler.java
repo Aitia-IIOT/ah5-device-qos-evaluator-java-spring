@@ -62,7 +62,7 @@ public class RttMeasurementJobScheduler {
 	public void start(final Device device) throws SchedulerException {
 		logger.debug("RttMeasurementJobScheduler.start started");
 		Assert.notNull(device, "device is null");
-		Assert.notNull(device.getId(), "device is is null");
+		Assert.notNull(device.getId(), "device id is null");
 
 		if (scheduler.checkExists(JobKey.jobKey(device.getId().toString() + jobSuffix))) {
 			logger.warn("RttMeasurementJobScheduler for " + device.getId().toString() + " already exists");

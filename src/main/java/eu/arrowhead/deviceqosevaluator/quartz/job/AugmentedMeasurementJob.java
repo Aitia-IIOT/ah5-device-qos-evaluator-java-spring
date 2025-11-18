@@ -77,17 +77,17 @@ public class AugmentedMeasurementJob extends QuartzJobBean {
 		try {
 			final Optional<Device> optional = deviceDbService.findById(deviceId);
 			if (optional.isEmpty()) {
-				logger.error("Device not exists: " + deviceId.toString());
+				logger.warn("Device not exists: " + deviceId.toString());
 				return;
 			}
 			final Device device = optional.get();
 
 			if (device.isInactive()) {
-				logger.error("Device is inactive: " + deviceId.toString());
+				logger.warn("Device is inactive: " + deviceId.toString());
 				return;
 			}
 			if (!device.isAugmented()) {
-				logger.error("Device is not supporting augmented measurements: " + deviceId.toString());
+				logger.warn("Device is not supporting augmented measurements: " + deviceId.toString());
 				return;
 			}
 

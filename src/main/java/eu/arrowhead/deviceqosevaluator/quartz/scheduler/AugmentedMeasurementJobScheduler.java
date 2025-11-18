@@ -62,7 +62,7 @@ public class AugmentedMeasurementJobScheduler {
 	public void start(final Device device) throws SchedulerException {
 		logger.debug("AugmentedMeasurementJobScheduler.start started");
 		Assert.notNull(device, "device is null");
-		Assert.notNull(device.getId(), "device is is null");
+		Assert.notNull(device.getId(), "device id is null");
 
 		if (scheduler.checkExists(JobKey.jobKey(device.getId().toString() + jobSuffix))) {
 			logger.warn("AugmentedMeasurementJob for " + device.getId().toString() + " already exists");
