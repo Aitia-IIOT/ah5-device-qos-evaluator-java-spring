@@ -47,6 +47,8 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String CLEANING_JOB_INTERVAL = "cleaning.job.interval";
 	public static final String $CLEANING_JOB_INTERVAL_WD = "${" + CLEANING_JOB_INTERVAL + ":" + DeviceQoSEvaluatorDefaults.CLEANING_JOB_INTERVAL_DEFAULT + "}";
 	public static final int CLEANING_JOB_INTERVAL_MIN_VALUE = 60; // sec
+	public static final String RAW_MEASUREMENT_DATA_MAX_AGE = "raw.measurement.data.max.age";
+	public static final String $RAW_MEASUREMENT_DATA_MAX_AGE_WD = "${" + RAW_MEASUREMENT_DATA_MAX_AGE + ":" + DeviceQoSEvaluatorDefaults.RAW_MEASUREMENT_DATA_MAX_AGE_DEFAULT + "}";
 	public static final String INACTIVE_DEVICE_MAX_AGE = "inactive.device.max.age";
 	public static final String $INACTIVE_DEVICE_MAX_AGE_WD = "${" + INACTIVE_DEVICE_MAX_AGE + ":" + DeviceQoSEvaluatorDefaults.INACTIVE_DEVICE_MAX_AGE_DEFAULT + "}";
 	

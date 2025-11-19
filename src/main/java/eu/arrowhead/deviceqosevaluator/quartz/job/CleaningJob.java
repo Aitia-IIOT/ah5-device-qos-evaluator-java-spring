@@ -36,6 +36,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
 import eu.arrowhead.deviceqosevaluator.jpa.service.DeviceDbService;
+import eu.arrowhead.deviceqosevaluator.jpa.service.StatDbService;
 import eu.arrowhead.deviceqosevaluator.jpa.service.SystemDbService;
 import eu.arrowhead.deviceqosevaluator.quartz.scheduler.AugmentedMeasurementJobScheduler;
 import eu.arrowhead.deviceqosevaluator.quartz.scheduler.RttMeasurementJobScheduler;
@@ -54,6 +55,9 @@ public class CleaningJob extends QuartzJobBean {
 
 	@Autowired
 	private SystemDbService systemDbService;
+	
+	@Autowired
+	private StatDbService statDbService;
 
 	@Autowired
 	private RttMeasurementJobScheduler rttMeasurementJobScheduler;
@@ -73,8 +77,10 @@ public class CleaningJob extends QuartzJobBean {
 
 		try {
 			final ZonedDateTime now = Utilities.utcNow();
+			
+			statDbService.removeBeforeTimestamp(now.minusMinutes(sysInfo.getRawMeasurementDataMaxAge()));
+			
 			final List<Device> toRemove = new ArrayList<>();
-
 			int page = 0;
 			boolean hasNext = true;
 			do {
@@ -84,7 +90,9 @@ public class CleaningJob extends QuartzJobBean {
 
 				final List<Device> toUpdate = new ArrayList<>();
 				for (final Device device : devicePage.getContent()) {
-					if (device.isInactive() && device.getUpdatedAt().plusMinutes(sysInfo.getInactiveDeviceMaxAge()).isAfter(now)) {
+					if (device.isInactive()
+							&& device.getUpdatedAt().plusMinutes(sysInfo.getInactiveDeviceMaxAge()).isAfter(now)
+							&& statDbService.hasAny(device.getId())) {
 						toRemove.add(device);
 						stopMeasuring(device); // just for sure
 						

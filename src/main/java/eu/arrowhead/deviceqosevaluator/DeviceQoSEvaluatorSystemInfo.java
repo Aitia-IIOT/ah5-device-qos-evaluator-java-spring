@@ -53,6 +53,9 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 
 	@Value(DeviceQoSEvaluatorConstants.$CLEANING_JOB_INTERVAL_WD)
 	private long cleaningJobInterval;
+	
+	@Value(DeviceQoSEvaluatorConstants.$RAW_MEASUREMENT_DATA_MAX_AGE_WD)
+	private int rawMeasurementDataMaxAge;
 
 	@Value(DeviceQoSEvaluatorConstants.$INACTIVE_DEVICE_MAX_AGE_WD)
 	private int inactiveDeviceMaxAge;
@@ -135,6 +138,11 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 	//-------------------------------------------------------------------------------------------------
 	public long getCleaningJobInterval() {
 		return cleaningJobInterval;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public int getRawMeasurementDataMaxAge() {
+		return rawMeasurementDataMaxAge;
 	}
 
 	//-------------------------------------------------------------------------------------------------

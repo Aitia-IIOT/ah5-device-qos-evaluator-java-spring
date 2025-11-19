@@ -129,5 +129,8 @@ public class DeviceQoSEvaluatorApplicationInitListener extends ApplicationInitLi
 		if (sysInfo.getCleaningJobInterval() < DeviceQoSEvaluatorConstants.CLEANING_JOB_INTERVAL_MIN_VALUE) {
 			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.CLEANING_JOB_INTERVAL + "' cannot be less than " + DeviceQoSEvaluatorConstants.CLEANING_JOB_INTERVAL_MIN_VALUE + " sec");
 		}
+		if (sysInfo.getEvaluationTimeWindow() >= sysInfo.getRawMeasurementDataMaxAge() * 60) {
+			throw new ConfigurationException("Invalid configuration: '" + DeviceQoSEvaluatorConstants.EVALUATION_TIME_WINDOW + "' must be less than " + DeviceQoSEvaluatorConstants.RAW_MEASUREMENT_DATA_MAX_AGE);
+		}
 	}
 }

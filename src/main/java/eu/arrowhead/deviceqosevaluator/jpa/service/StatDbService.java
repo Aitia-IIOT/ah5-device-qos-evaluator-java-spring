@@ -169,6 +169,57 @@ public class StatDbService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public boolean hasAny(final UUID deviceId) {
+		logger.debug("hasAny started");
+		Assert.notNull(deviceId, "deviceId is null");
+		
+		try {
+			if (rttStatRepo.existsByUuid(deviceId)) {
+				return true;
+			}
+			if (cpuStatRepo.existsByUuid(deviceId)) {
+				return true;
+			}
+			if (memoryStatRepo.existsByUuid(deviceId)) {
+				return true;
+			}
+			if (netEgressStatRepo.existsByUuid(deviceId)) {
+				return true;
+			}
+			if (netIngressStatRepo.existsByUuid(deviceId)) {
+				return true;
+			}
+			
+			return false;
+			
+		} catch (final Exception ex) {
+			logger.error(ex.getMessage());
+			logger.debug(ex);
+			throw new InternalServerError("Database operation error");
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeBeforeTimestamp(final ZonedDateTime timestamp) {
+		logger.debug("removeBeforeTimestamp started");
+		Assert.notNull(timestamp, "timestamp is null");
+		
+		try {
+			rttStatRepo.deleteAllByTimestampBefore(timestamp);
+			cpuStatRepo.deleteAllByTimestampBefore(timestamp);
+			memoryStatRepo.deleteAllByTimestampBefore(timestamp);
+			netEgressStatRepo.deleteAllByTimestampBefore(timestamp);
+			netIngressStatRepo.deleteAllByTimestampBefore(timestamp);
+			
+		} catch (final Exception ex) {
+			logger.error(ex.getMessage());
+			logger.debug(ex);
+			throw new InternalServerError("Database operation error");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public Page<StatQueryResultModel> query(final Collection<String> systemNames, final ZonedDateTime from, final ZonedDateTime to, final OidGroup oidGroup, final PageRequest pagination) {
 		logger.debug("query started");
 		Assert.notNull(oidGroup, "oidGroup is null");
