@@ -29,6 +29,7 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String OID_NAME_DELIMITER = "_";
 	
 	public static final String VERSION_QUALITY_EVALUATION = "1.0.0";
+	public static final String VERSION_DEVICE_QUALITY_DATA_MANAGEMENT = "1.0.0";
 	
 	public static final List<Double> NO_MEASUREMENT_VALUES = List.of(-1d, -1d, -1d, -1d, -1d);
 	
@@ -67,6 +68,7 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String MQTT_API_BASE_TOPIC_PREFIX = "arrowhead/deviceqosevaluator";
 	public static final String MQTT_API_MONITOR_BASE_TOPIC = MQTT_API_BASE_TOPIC_PREFIX + "/monitor/";
 	public static final String MQTT_API_QUALITY_EVALUATION_BASE_TOPIC = MQTT_API_BASE_TOPIC_PREFIX + "/qualityevaluation/";
+	public static final String MQTT_API_DEVICE_QUALITY_DATA_MANAGEMENT_BASE_TOPIC = MQTT_API_BASE_TOPIC_PREFIX + "/devicequalitydatamanagement/";
 	
 	// Quartz related
 	public static final String MEASUREMENT_ORGANIZER_JOB = "measurement_organizer_job";

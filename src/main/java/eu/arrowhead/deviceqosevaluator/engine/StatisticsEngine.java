@@ -114,7 +114,7 @@ public class StatisticsEngine {
 
 		double score = 0;
 		for (final OidMetricModel metricModel : metrics) {
-			final List<StatEntity> data = statDbService.getByDeviceIdUntilTimestamp(metricModel.getGroup(), deviceId, afterTimestamp);
+			final List<StatEntity> data = statDbService.getByDeviceIdAfterTimestamp(metricModel.getGroup(), deviceId, afterTimestamp);
 			if (!hasData(data)) {
 				noStat.add(metricModel.getGroup());
 			}

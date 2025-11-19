@@ -129,8 +129,8 @@ public class StatDbService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<StatEntity> getByDeviceIdUntilTimestamp(final OidGroup oidGroup, final UUID deviceId, final ZonedDateTime timestamp) {
-		logger.debug("getByDeviceId started");
+	public List<StatEntity> getByDeviceIdAfterTimestamp(final OidGroup oidGroup, final UUID deviceId, final ZonedDateTime timestamp) {
+		logger.debug("getByDeviceIdAfterTimestamp started");
 		Assert.notNull(oidGroup, "oidGroup is null");
 		Assert.notNull(deviceId, "deviceId is null");
 

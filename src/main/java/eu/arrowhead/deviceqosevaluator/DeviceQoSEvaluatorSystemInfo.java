@@ -53,10 +53,10 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 
 	@Value(DeviceQoSEvaluatorConstants.$CLEANING_JOB_INTERVAL_WD)
 	private long cleaningJobInterval;
-	
+
 	@Value(DeviceQoSEvaluatorConstants.$INACTIVE_DEVICE_MAX_AGE_WD)
 	private int inactiveDeviceMaxAge;
-	
+
 	@Value(Constants.$MAX_PAGE_SIZE_WD)
 	private int maxPageSize;
 
@@ -100,8 +100,15 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 				.serviceInterface(getMqttServiceInterfaceForQualityEvaluationService())
 				.build();
 
+		final ServiceModel deviceQualityDataManagement = new ServiceModel.Builder()
+				.serviceDefinition(Constants.SERVICE_DEF_DEVICE_QUALITY_DATA_MANAGEMENT)
+				.version(DeviceQoSEvaluatorConstants.VERSION_DEVICE_QUALITY_DATA_MANAGEMENT)
+				.serviceInterface(getHttpServiceInterfaceForDeviceQualityDataManagementService())
+				.serviceInterface(getMqttServiceInterfaceForDeviceQualityDataManagementService())
+				.build();
+
 		// starting with management services speeds up management filters
-		return List.of(qualityEvaluation);
+		return List.of(deviceQualityDataManagement, qualityEvaluation);
 		// TODO: add monitor service when it is specified and implemented
 	}
 
@@ -172,6 +179,11 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 		return getHttpServiceInterfaceForAQualityEvaluationService(DeviceQoSEvaluatorConstants.HTTP_API_QUALITY_EVALUATION_PATH);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private InterfaceModel getHttpServiceInterfaceForDeviceQualityDataManagementService() {
+		return getHttpServiceInterfaceForADeviceQualityDataManagementService(DeviceQoSEvaluatorConstants.HTTP_API_DEVICE_QUALITY_DATA_MANAGEMENT_PATH);
+	}
+
 	// HTTP Interface Operations
 
 	//-------------------------------------------------------------------------------------------------
@@ -194,6 +206,26 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 				.build();
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private InterfaceModel getHttpServiceInterfaceForADeviceQualityDataManagementService(final String basePath) {
+		final String templateName = getSslProperties().isSslEnabled() ? Constants.GENERIC_HTTPS_INTERFACE_TEMPLATE_NAME : Constants.GENERIC_HTTP_INTERFACE_TEMPLATE_NAME;
+
+		final HttpOperationModel query = new HttpOperationModel.Builder()
+				.method(HttpMethod.POST.name())
+				.path(DeviceQoSEvaluatorConstants.HTTP_API_OP_QUERY_PATH)
+				.build();
+		final HttpOperationModel reload = new HttpOperationModel.Builder()
+				.method(HttpMethod.GET.name())
+				.path(DeviceQoSEvaluatorConstants.HTTP_API_OP_RELOAD_PATH)
+				.build();
+
+		return new HttpInterfaceModel.Builder(templateName, getDomainAddress(), getServerPort())
+				.basePath(basePath)
+				.operation(Constants.SERVICE_OP_QUERY, query)
+				.operation(Constants.SERVICE_OP_RELOAD, reload)
+				.build();
+	}
+
 	// MQTT Interfaces
 
 	//-------------------------------------------------------------------------------------------------
@@ -206,6 +238,19 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 		return new MqttInterfaceModel.Builder(templateName, getMqttBrokerAddress(), getMqttBrokerPort())
 				.baseTopic(DeviceQoSEvaluatorConstants.MQTT_API_QUALITY_EVALUATION_BASE_TOPIC)
 				.operations(Set.of(Constants.SERVICE_OP_FILTER, Constants.SERVICE_OP_SORT))
+				.build();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private InterfaceModel getMqttServiceInterfaceForDeviceQualityDataManagementService() {
+		if (!isMqttApiEnabled()) {
+			return null;
+		}
+
+		final String templateName = getSslProperties().isSslEnabled() ? Constants.GENERIC_MQTTS_INTERFACE_TEMPLATE_NAME : Constants.GENERIC_MQTT_INTERFACE_TEMPLATE_NAME;
+		return new MqttInterfaceModel.Builder(templateName, getMqttBrokerAddress(), getMqttBrokerPort())
+				.baseTopic(DeviceQoSEvaluatorConstants.MQTT_API_DEVICE_QUALITY_DATA_MANAGEMENT_BASE_TOPIC)
+				.operations(Set.of(Constants.SERVICE_OP_QUERY, Constants.SERVICE_OP_RELOAD))
 				.build();
 	}
 }
