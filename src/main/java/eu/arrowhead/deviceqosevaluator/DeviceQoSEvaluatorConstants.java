@@ -31,6 +31,8 @@ public class DeviceQoSEvaluatorConstants {
 	public static final String VERSION_QUALITY_EVALUATION = "1.0.0";
 	public static final String VERSION_DEVICE_QUALITY_DATA_MANAGEMENT = "1.0.0";
 	
+	public static final String METADATA_VALUE_QUALITY_EVALUATION_SERVICE_VARIANT = "basic-device-kpi";
+	
 	// Config related
 	
 	public static final String MEASUREMENT_ORGANIZER_JOB_INTERVAL = "measurement.organizer.job.interval";

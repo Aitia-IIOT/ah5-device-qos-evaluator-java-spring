@@ -26,8 +26,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.service.validation.name.SystemNameNormalizer;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
-import eu.arrowhead.dto.QoSEvaluationConfigDTO;
-import eu.arrowhead.dto.QoSEvaluationRequestDTO;
+import eu.arrowhead.dto.QoSDeviceDataEvaluationConfigDTO;
 
 @Service
 public class QualitiyEvaluationNormalization {
@@ -43,18 +42,23 @@ public class QualitiyEvaluationNormalization {
 
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<String> normalizeSystemNames(final List<String> names) {
+		Assert.notNull(names, "names is null");
+
+		return names.stream().map(n -> systemNameNormalizer.normalize(n)).toList();
+	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSEvaluationRequestDTO normalizeQoSEvaluationRequestDTO(final QoSEvaluationRequestDTO dto) {
+	public QoSDeviceDataEvaluationConfigDTO normalizeQoSDeviceDataEvaluationConfigDTO(final QoSDeviceDataEvaluationConfigDTO dto) {
 		Assert.notNull(dto, "dto is null");
 
-		return new QoSEvaluationRequestDTO(
-				dto.providers().stream().map(p -> systemNameNormalizer.normalize(p)).toList(),
-				new QoSEvaluationConfigDTO(
-						dto.configuration().metricNames().stream().map(mn -> mn.toUpperCase().trim()).toList(),
-						normalizeMetricWeights(dto.configuration().metricWeights(), dto.configuration().metricNames().size()),
-						normalizeTimeWindow(dto.configuration().timeWindow()),
-						dto.configuration().threshold()));
+		return new QoSDeviceDataEvaluationConfigDTO(
+				dto.metricNames().stream().map(mn -> mn.toUpperCase().trim()).toList(),
+				normalizeMetricWeights(dto.metricWeights(), dto.metricNames().size()),
+				normalizeTimeWindow(dto.timeWindow()),
+				dto.threshold());
 	}
 
 	//=================================================================================================

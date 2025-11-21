@@ -27,9 +27,14 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.engine.StatisticsEngine;
@@ -38,6 +43,7 @@ import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
 import eu.arrowhead.deviceqosevaluator.service.model.OidMetricModel;
 import eu.arrowhead.deviceqosevaluator.service.model.SystemEvalModel;
 import eu.arrowhead.deviceqosevaluator.service.validation.QualitiyEvaluationValidation;
+import eu.arrowhead.dto.QoSDeviceDataEvaluationConfigDTO;
 import eu.arrowhead.dto.QoSEvaluationFilterResponseDTO;
 import eu.arrowhead.dto.QoSEvaluationRequestDTO;
 import eu.arrowhead.dto.QoSEvaluationSortResponseDTO;
@@ -57,6 +63,9 @@ public class QualityEvaluationService {
 	@Autowired
 	private StatisticsEngine statEngine;
 
+	@Autowired
+	private ObjectMapper mapper;
+	
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -65,60 +74,76 @@ public class QualityEvaluationService {
 	//-------------------------------------------------------------------------------------------------
 	public QoSEvaluationFilterResponseDTO filter(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("filter started");
-
-		final QoSEvaluationRequestDTO normalized = validator.validateAndNormalizeQoSEvaluationRequest(dto, true, origin);
 		
-		final List<SystemEvalModel> evaluated = evaluateRequest(normalized);
-		final List<String> passedProviders = new ArrayList<>();
-		final List<String> droppedProviders = new ArrayList<>();
-		final Map<String, List<String>> warnings = new HashMap<>();
-		
-		for (final SystemEvalModel sysResult : evaluated) {
-			if (sysResult.getScore() <= normalized.configuration().threshold()) {
-				passedProviders.add(sysResult.getName());
-			} else {
-				droppedProviders.add(sysResult.getName());
+		try {
+			final List<String> systems = dto == null ? null : dto.providers();
+			final QoSDeviceDataEvaluationConfigDTO config = dto == null || dto.configuration() == null ? null : mapper.readValue(Utilities.toJson(dto.configuration()), QoSDeviceDataEvaluationConfigDTO.class);
+			
+			final Pair<List<String>, QoSDeviceDataEvaluationConfigDTO> normalized = validator.validateAndNormalizeQoSEvaluationRequest(systems, config, true, origin);
+			
+			final List<SystemEvalModel> evaluated = evaluateRequest(normalized.getFirst(), normalized.getSecond());
+			final List<String> passedProviders = new ArrayList<>();
+			final List<String> droppedProviders = new ArrayList<>();
+			final Map<String, List<String>> warnings = new HashMap<>();
+			
+			for (final SystemEvalModel sysResult : evaluated) {
+				if (sysResult.getScore() <= config.threshold()) {
+					passedProviders.add(sysResult.getName());
+				} else {
+					droppedProviders.add(sysResult.getName());
+				}
+				
+				if (!Utilities.isEmpty(sysResult.getNoStat())) {
+					warnings.put(sysResult.getName(), sysResult.getNoStat().stream().map(item -> item.name()).toList());
+				}
 			}
 			
-			if (!Utilities.isEmpty(sysResult.getNoStat())) {
-				warnings.put(sysResult.getName(), sysResult.getNoStat().stream().map(item -> item.name()).toList());
-			}
+			return new QoSEvaluationFilterResponseDTO(passedProviders, droppedProviders, warnings);
+			
+		} catch (final JsonProcessingException ex) {
+			throw new InvalidParameterException("Invalid configuration payload", origin);
 		}
-		
-		return new QoSEvaluationFilterResponseDTO(passedProviders, droppedProviders, warnings);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSEvaluationSortResponseDTO sort(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("sort started");
 
-		final QoSEvaluationRequestDTO normalized = validator.validateAndNormalizeQoSEvaluationRequest(dto, false, origin);
-		
-		final List<SystemEvalModel> evaluated = evaluateRequest(normalized);
-		final List<String> sortedProviders = new ArrayList<>();
-		final Map<String, List<String>> warnings = new HashMap<>();
-		
-		evaluated.sort(Comparator.comparingDouble(SystemEvalModel::getScore)); //ascending
-		for (final SystemEvalModel sysResult : evaluated) {
-			sortedProviders.add(sysResult.getName());
-			if (!Utilities.isEmpty(sysResult.getNoStat())) {
-				warnings.put(sysResult.getName(), sysResult.getNoStat().stream().map(item -> item.name()).toList());
+		try {
+			final List<String> systems = dto == null ? null : dto.providers();
+			final QoSDeviceDataEvaluationConfigDTO config = dto == null || dto.configuration() == null ? null : mapper.readValue(Utilities.toJson(dto.configuration()), QoSDeviceDataEvaluationConfigDTO.class);
+			
+			final Pair<List<String>, QoSDeviceDataEvaluationConfigDTO> normalized = validator.validateAndNormalizeQoSEvaluationRequest(systems, config, false, origin);
+			
+			final List<SystemEvalModel> evaluated = evaluateRequest(normalized.getFirst(), normalized.getSecond());
+			final List<String> sortedProviders = new ArrayList<>();
+			final Map<String, List<String>> warnings = new HashMap<>();
+			
+			evaluated.sort(Comparator.comparingDouble(SystemEvalModel::getScore)); //ascending
+			for (final SystemEvalModel sysResult : evaluated) {
+				sortedProviders.add(sysResult.getName());
+				if (!Utilities.isEmpty(sysResult.getNoStat())) {
+					warnings.put(sysResult.getName(), sysResult.getNoStat().stream().map(item -> item.name()).toList());
+				}
 			}
+			
+			return new QoSEvaluationSortResponseDTO(sortedProviders, warnings);
+			
+		} catch (final JsonProcessingException ex) {
+			throw new InvalidParameterException("Invalid configuration payload", origin);
 		}
-		
-		return new QoSEvaluationSortResponseDTO(sortedProviders, warnings);
 	}
 	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<SystemEvalModel> evaluateRequest(final QoSEvaluationRequestDTO normalized) {
+	private List<SystemEvalModel> evaluateRequest(final List<String> systems, final QoSDeviceDataEvaluationConfigDTO config) {
 		logger.debug("evaluateRequest started");
 		
-		final Set<String> providers = new HashSet<>(normalized.providers());
-		final List<OidMetricModel> metricModels = parseMetricModels(normalized.configuration().metricNames(), normalized.configuration().metricWeights());
-		long timeWindow = normalized.configuration().timeWindow() == null ? sysInfo.getEvaluationTimeWindow() : normalized.configuration().timeWindow();
+		final Set<String> providers = new HashSet<>(systems);
+		final List<OidMetricModel> metricModels = parseMetricModels(config.metricNames(), config.metricWeights());
+		long timeWindow = config.timeWindow() == null ? sysInfo.getEvaluationTimeWindow() : config.timeWindow();
 		if (timeWindow < sysInfo.getAugmentedMeasurementJobInterval()) {
 			timeWindow = sysInfo.getAugmentedMeasurementJobInterval();
 		}

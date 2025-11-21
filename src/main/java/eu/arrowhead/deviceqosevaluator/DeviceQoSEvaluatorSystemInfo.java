@@ -102,6 +102,7 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 		final ServiceModel qualityEvaluation = new ServiceModel.Builder()
 				.serviceDefinition(Constants.SERVICE_DEF_QUALITY_EVALUATION)
 				.version(DeviceQoSEvaluatorConstants.VERSION_QUALITY_EVALUATION)
+				.metadata(Constants.METADATA_KEY_EVALUATION_TYPE, DeviceQoSEvaluatorConstants.METADATA_VALUE_QUALITY_EVALUATION_SERVICE_VARIANT)
 				.serviceInterface(getHttpServiceInterfaceForQualityEvaluationService())
 				.serviceInterface(getMqttServiceInterfaceForQualityEvaluationService())
 				.build();
