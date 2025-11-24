@@ -30,7 +30,7 @@ public interface DeviceRepository extends RefreshableRepository<Device, UUID> {
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<Device> findAllByAddressIn(final Set<String> addresses);
 }

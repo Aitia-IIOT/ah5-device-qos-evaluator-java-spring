@@ -23,14 +23,14 @@ public enum OidMetric {
 
 	//=================================================================================================
 	// members
-	
+
 	MINIMUM("1"), MAXIMUM("2"), MEAN("3"), MEDIAN("4"), CURRENT("5");
-	
+
 	private final String value;
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private OidMetric(final String value) {
 		this.value = value;
@@ -40,7 +40,7 @@ public enum OidMetric {
 	public String getValue() {
 		return value;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static List<OidMetric> all() {
 		return Arrays.asList(OidMetric.values());

@@ -20,15 +20,15 @@ public enum OidGroup {
 
 	//=================================================================================================
 	// members
-	
+
 	RTT("0.0", 100d), CPU_TOTAL_LOAD("1.4", 100d), MEMORY_USED("2.1", 100d), NETWORK_EGRESS_LOAD("3.1", 100d), NETWORK_INGRESS_LOAD("3.2", 100d);
-	
+
 	private final String value;
 	private final double worstStat;
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private OidGroup(final String value, final double worstStat) {
 		this.value = value;

@@ -74,7 +74,7 @@ public class DeviceQualityDataManagementService {
 
 		final QoSDeviceStatQueryRequestDTO normalized = validator.validateAndNormalizeQueryRequest(dto, origin);
 		final PageRequest pageRequest = pageService.getPageRequest(normalized.pagination(), Direction.DESC, StatEntity.SORTABLE_FIELDS_BY, StatEntity.DEFAULT_SORT_FIELD, origin);
-		
+
 		try {
 			final Page<StatQueryResultModel> results = statDbService.query(normalized.systemNames(), Utilities.parseUTCStringToZonedDateTime(normalized.from()), Utilities.parseUTCStringToZonedDateTime(normalized.to()),
 					OidGroup.valueOf(normalized.metricGroup()), pageRequest);

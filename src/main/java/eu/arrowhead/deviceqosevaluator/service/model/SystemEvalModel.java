@@ -16,13 +16,10 @@
  *******************************************************************************/
 package eu.arrowhead.deviceqosevaluator.service.model;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
-import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
 
 public class SystemEvalModel {
 
@@ -64,7 +61,7 @@ public class SystemEvalModel {
 	//-------------------------------------------------------------------------------------------------
 	public void addNoStat(final OidGroup group) {
 		noStat.add(group);
-		
+
 	}
 
 	//-------------------------------------------------------------------------------------------------

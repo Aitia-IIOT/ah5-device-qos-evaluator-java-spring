@@ -51,6 +51,9 @@ public class QualitiyEvaluationValidation {
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
+	private static final int THRESHOLD_BOTTOM = 0;
+	private static final int THRESHOLD_TOP = 100;
+
 	//=================================================================================================
 	// methods
 
@@ -95,7 +98,7 @@ public class QualitiyEvaluationValidation {
 				throw new InvalidParameterException("Threshold configuration is missing", origin);
 			}
 
-			if (config.threshold() < 0 || config.threshold() > 100) {
+			if (config.threshold() < THRESHOLD_BOTTOM || config.threshold() > THRESHOLD_TOP) {
 				throw new InvalidParameterException("Invalid threshold configuration, must be between 0 and 100", origin);
 			}
 		}

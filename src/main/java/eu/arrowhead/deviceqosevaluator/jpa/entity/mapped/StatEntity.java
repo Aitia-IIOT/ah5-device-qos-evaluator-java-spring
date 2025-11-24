@@ -31,7 +31,7 @@ public abstract class StatEntity {
 
 	//=================================================================================================
 	// members
-	
+
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "timestamp");
 	public static final String DEFAULT_SORT_FIELD = "timestamp";
 
@@ -59,7 +59,7 @@ public abstract class StatEntity {
 
 	@Column(nullable = false)
 	protected double current;
-	
+
 	//=================================================================================================
 	// methods
 

@@ -69,7 +69,7 @@ public class CleaningJobScheduler {
 		currentTrigger = TriggerBuilder.newTrigger()
 				.withIdentity(DeviceQoSEvaluatorConstants.CLEANING_JOB_TRIGGER)
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-						.withIntervalInMilliseconds(sysInfo.getCleaningJobInterval() * 1000) // from sec to milisec
+						.withIntervalInMilliseconds(sysInfo.getCleaningJobInterval() * DeviceQoSEvaluatorConstants.SEC_TO_MS) // from sec to milisec
 						.repeatForever())
 				.build();
 

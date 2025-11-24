@@ -55,7 +55,7 @@ public class CleaningJob extends QuartzJobBean {
 
 	@Autowired
 	private SystemDbService systemDbService;
-	
+
 	@Autowired
 	private StatDbService statDbService;
 
@@ -77,9 +77,9 @@ public class CleaningJob extends QuartzJobBean {
 
 		try {
 			final ZonedDateTime now = Utilities.utcNow();
-			
+
 			statDbService.removeBeforeTimestamp(now.minusMinutes(sysInfo.getRawMeasurementDataMaxAge()));
-			
+
 			final List<Device> toRemove = new ArrayList<>();
 			int page = 0;
 			boolean hasNext = true;
@@ -95,7 +95,7 @@ public class CleaningJob extends QuartzJobBean {
 							&& statDbService.hasAny(device.getId())) {
 						toRemove.add(device);
 						stopMeasuring(device); // just for sure
-						
+
 					} else if (Utilities.isEmpty(systemDbService.findByDeviceId(device.getId()))) {
 						device.setInactive(true);
 						stopMeasuring(device);
@@ -114,10 +114,10 @@ public class CleaningJob extends QuartzJobBean {
 			logger.debug(ex);
 		}
 	}
-	
+
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private void stopMeasuring(final Device device) throws SchedulerException {
 		if (rttMeasurementJobScheduler.isScheduled(device)) {

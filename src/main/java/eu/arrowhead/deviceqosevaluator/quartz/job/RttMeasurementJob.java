@@ -51,15 +51,16 @@ public class RttMeasurementJob extends QuartzJobBean {
 
 	@Autowired
 	private RttMeasurementDriver measurementDriver;
-	
+
 	@Autowired
 	private StatDbService statDbService;
 
 	private UUID deviceId;
 
+	private static final int TEST_COUNT = 9;
 	private static final int MIN_TEST_PORT = 49152;
 	private static final int MAX_TEST_PORT = 65535;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -89,7 +90,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 				return;
 			}
 
-			final double[] results = new double[9];
+			final double[] results = new double[TEST_COUNT];
 			boolean timeout = false;
 			for (int i = 0; i < results.length; ++i) {
 				results[i] = doMeasurement(device);
@@ -98,7 +99,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 					break;
 				}
 			}
-			
+
 			statDbService.save(
 					Utilities.utcNow(),
 					OidGroup.RTT,
@@ -113,7 +114,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private long doMeasurement(final Device device) throws IOException {
 		Integer rttPort = device.getRttPort();
@@ -128,12 +129,12 @@ public class RttMeasurementJob extends QuartzJobBean {
 				rttPort = randomPort();
 			}
 		} while (result == null);
-		
+
 		if (device.getRttPort() != rttPort) {
 			device.setRttPort(rttPort);
 			deviceDbService.update(device);
 		}
-		
+
 		return result;
 	}
 

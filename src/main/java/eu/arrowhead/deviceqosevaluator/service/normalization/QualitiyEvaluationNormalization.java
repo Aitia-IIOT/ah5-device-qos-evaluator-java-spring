@@ -40,9 +40,12 @@ public class QualitiyEvaluationNormalization {
 	@Autowired
 	private SystemNameNormalizer systemNameNormalizer;
 
+	private static final double TOLERANCE_BOTTOM = 0.9;
+	private static final double TOLERANCE_TOP = 1.1;
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<String> normalizeSystemNames(final List<String> names) {
 		Assert.notNull(names, "names is null");
@@ -81,7 +84,7 @@ public class QualitiyEvaluationNormalization {
 			sum += w;
 		}
 
-		if (sum < 0.9d || sum > 1.1d) {
+		if (sum < TOLERANCE_BOTTOM || sum > TOLERANCE_TOP) {
 			for (final Double w : weights) {
 				normalized.add(w / sum);
 			}

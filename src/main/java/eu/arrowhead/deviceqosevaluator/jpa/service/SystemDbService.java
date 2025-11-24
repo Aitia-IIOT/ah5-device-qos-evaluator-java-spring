@@ -38,68 +38,68 @@ public class SystemDbService {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private SystemRepository systemRepo;
-	
+
 	@Autowired
 	private DeviceRepository deviceRepository;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void save(final Iterable<System> systems) {
 		logger.debug("save started");
-		
+
 		try {
-			systemRepo.saveAllAndFlush(systems);			
+			systemRepo.saveAllAndFlush(systems);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<System> findByNames(final Iterable<String> names) {
 		logger.debug("findByNames started");
-	
+
 		try {
-			return systemRepo.findAllByNameIn(names);			
+			return systemRepo.findAllByNameIn(names);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<System> findByDeviceId(final UUID deviceId) {
 		logger.debug("findByDevice started");
-		
+
 		try {
 			final Optional<Device> optional = deviceRepository.findById(deviceId);
 			if (optional.isEmpty()) {
 				return List.of();
 			} else {
 				return systemRepo.findAllByDevice(optional.get());
-			}			
+			}
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public int deleteSystemsWithoutDevice() {
 		logger.debug("deleteSystemsWithoutDevice started");
-		
+
 		try {
 			final List<System> systems = systemRepo.findAllByDeviceIsNull();
 			systemRepo.deleteAllByNameIn(systems.stream().map(s -> s.getName()).toList());

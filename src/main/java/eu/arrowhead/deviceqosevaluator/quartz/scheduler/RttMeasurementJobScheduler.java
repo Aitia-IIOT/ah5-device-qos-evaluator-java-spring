@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
 import eu.arrowhead.deviceqosevaluator.quartz.job.RttMeasurementJob;
@@ -81,7 +82,7 @@ public class RttMeasurementJobScheduler {
 		final Trigger trigger = TriggerBuilder.newTrigger()
 				.withIdentity(device.getId().toString() + triggerSuffix)
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-						.withIntervalInMilliseconds(sysInfo.getRttMeasurementJobInterval() * 1000) // from sec to milisec
+						.withIntervalInMilliseconds(sysInfo.getRttMeasurementJobInterval() * DeviceQoSEvaluatorConstants.SEC_TO_MS) // from sec to milisec
 						.repeatForever())
 				.build();
 
@@ -89,7 +90,7 @@ public class RttMeasurementJobScheduler {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void stop(List<Device> devices) throws SchedulerException {
+	public void stop(final List<Device> devices) throws SchedulerException {
 		logger.debug("RttMeasurementJobScheduler.stop started");
 		Assert.notNull(devices, "device list is null");
 

@@ -31,19 +31,19 @@ public class DeviceQualityDataManagementNormalization {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private SystemNameNormalizer sysNameNormalizer;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public QoSDeviceStatQueryRequestDTO normalizeQoSDeviceStatQueryRequestDTO(final QoSDeviceStatQueryRequestDTO dto) {
 		logger.debug("normalizeQoSDeviceStatQueryRequestDTO");
-		
+
 		return new QoSDeviceStatQueryRequestDTO(
 				dto.pagination(),
 				dto.metricGroup().trim().toUpperCase(),

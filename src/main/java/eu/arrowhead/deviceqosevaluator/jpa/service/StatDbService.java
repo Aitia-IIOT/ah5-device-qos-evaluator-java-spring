@@ -87,6 +87,7 @@ public class StatDbService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("checkstyle:MagicNumberCheck")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void save(final ZonedDateTime timestamp, final OidGroup oidGroup, final UUID deviceId, final List<Double> data) {
 		logger.debug("save started");
@@ -158,7 +159,7 @@ public class StatDbService {
 			default:
 				logger.error("Unhandled OID group: " + oidGroup);
 			}
-			
+
 			return result;
 
 		} catch (final Exception ex) {
@@ -172,7 +173,7 @@ public class StatDbService {
 	public boolean hasAny(final UUID deviceId) {
 		logger.debug("hasAny started");
 		Assert.notNull(deviceId, "deviceId is null");
-		
+
 		try {
 			if (rttStatRepo.existsByUuid(deviceId)) {
 				return true;
@@ -189,36 +190,36 @@ public class StatDbService {
 			if (netIngressStatRepo.existsByUuid(deviceId)) {
 				return true;
 			}
-			
+
 			return false;
-			
-		} catch (final Exception ex) {
-			logger.error(ex.getMessage());
-			logger.debug(ex);
-			throw new InternalServerError("Database operation error");
-		}		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
-	public void removeBeforeTimestamp(final ZonedDateTime timestamp) {
-		logger.debug("removeBeforeTimestamp started");
-		Assert.notNull(timestamp, "timestamp is null");
-		
-		try {
-			rttStatRepo.deleteAllByTimestampBefore(timestamp);
-			cpuStatRepo.deleteAllByTimestampBefore(timestamp);
-			memoryStatRepo.deleteAllByTimestampBefore(timestamp);
-			netEgressStatRepo.deleteAllByTimestampBefore(timestamp);
-			netIngressStatRepo.deleteAllByTimestampBefore(timestamp);
-			
+
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeBeforeTimestamp(final ZonedDateTime timestamp) {
+		logger.debug("removeBeforeTimestamp started");
+		Assert.notNull(timestamp, "timestamp is null");
+
+		try {
+			rttStatRepo.deleteAllByTimestampBefore(timestamp);
+			cpuStatRepo.deleteAllByTimestampBefore(timestamp);
+			memoryStatRepo.deleteAllByTimestampBefore(timestamp);
+			netEgressStatRepo.deleteAllByTimestampBefore(timestamp);
+			netIngressStatRepo.deleteAllByTimestampBefore(timestamp);
+
+		} catch (final Exception ex) {
+			logger.error(ex.getMessage());
+			logger.debug(ex);
+			throw new InternalServerError("Database operation error");
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public Page<StatQueryResultModel> query(final Collection<String> systemNames, final ZonedDateTime from, final ZonedDateTime to, final OidGroup oidGroup, final PageRequest pagination) {
 		logger.debug("query started");
@@ -258,21 +259,21 @@ public class StatDbService {
 				pageable = memoryStatPage.getPageable();
 				total = memoryStatPage.getTotalElements();
 				break;
-				
+
 			case NETWORK_EGRESS_LOAD:
 				final Page<StatNetEgressLoad> netEgressStatPage = queryNetEgressLoad(devices, start, end, pagination);
 				records.addAll(netEgressStatPage.getContent());
 				pageable = netEgressStatPage.getPageable();
 				total = netEgressStatPage.getTotalElements();
 				break;
-				
+
 			case NETWORK_INGRESS_LOAD:
 				final Page<StatNetIngressLoad> netIngressStatPage = queryNetIngressLoad(devices, start, end, pagination);
 				records.addAll(netIngressStatPage.getContent());
 				pageable = netIngressStatPage.getPageable();
 				total = netIngressStatPage.getTotalElements();
 				break;
-				
+
 			default:
 				logger.error("Unhandled OID group: " + oidGroup);
 			}
@@ -327,7 +328,7 @@ public class StatDbService {
 		}
 		return memoryStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private Page<StatNetEgressLoad> queryNetEgressLoad(final Set<UUID> devices, final ZonedDateTime start, final ZonedDateTime end, final PageRequest pagination) {
 		logger.debug("queryNetEgressLoad started");
@@ -337,7 +338,7 @@ public class StatDbService {
 		}
 		return netEgressStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private Page<StatNetIngressLoad> queryNetIngressLoad(final Set<UUID> devices, final ZonedDateTime start, final ZonedDateTime end, final PageRequest pagination) {
 		logger.debug("queryNetIngressLoad started");

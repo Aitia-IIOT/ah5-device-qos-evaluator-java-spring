@@ -26,15 +26,14 @@ public class OidMetricModel {
 
 	//=================================================================================================
 	// members
-	
+
 	private final OidGroup group;
 	private final Double scaleTo;
 	private final Map<OidMetric, Double> metricWeight = new HashMap<>();
 
-	
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public OidMetricModel(final OidGroup group, final Double scaleTo) {
 		this.group = group;
@@ -45,7 +44,7 @@ public class OidMetricModel {
 	public OidGroup getGroup() {
 		return group;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public Double getScaleTo() {
 		return scaleTo;

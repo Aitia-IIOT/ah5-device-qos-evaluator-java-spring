@@ -54,19 +54,19 @@ public class MeasurementEngine {
 
 	@Autowired
 	private ArrowheadHttpService ahHttpService;
-	
+
 	@Autowired
 	private DeviceDbService deviceDbService;
-	
+
 	@Autowired
 	private SystemDbService systemDbService;
-	
+
 	@Autowired
 	private RttMeasurementJobScheduler rttMeasurementJobScheduler;
-	
+
 	@Autowired
 	private AugmentedMeasurementJobScheduler augmentedMeasurementJobScheduler;
-	
+
 	private boolean working = false;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
@@ -77,7 +77,7 @@ public class MeasurementEngine {
 	//-------------------------------------------------------------------------------------------------
 	public Pair<Integer, Integer> organize() throws SchedulerException, ArrowheadException {
 		logger.debug("organize started");
-		
+
 		if (working) {
 			return null;
 		}
@@ -96,7 +96,7 @@ public class MeasurementEngine {
 	//-------------------------------------------------------------------------------------------------
 	private SystemDeviceMap acquireSystemsAndDevices() {
 		logger.debug("acquireSystemsAndDevices started");
-		
+
 		final SystemDeviceMap map = new SystemDeviceMap();
 
 		boolean hasMorePage = false;
@@ -118,24 +118,24 @@ public class MeasurementEngine {
 			hasMorePage = counter < response.count();
 			pageNumber = hasMorePage ? pageNumber + 1 : pageNumber;
 			pageSize = pageSize == null ? response.entries().size() : pageSize;
-			
+
 			map.load(response.entries());
 		} while (hasMorePage);
 
 		return map;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private int arrangeDatabaseAndMeasurements(final SystemDeviceMap systemDeviceMap) throws SchedulerException {
 		logger.debug("arrangeDatabaseAndMeasurements started");
-		
+
 		int newSysCnt = 0;
 		for (int i = 0; i < systemDeviceMap.getDeviceSize(); ++i) {
-			
+
 			// Handle devices
-			final Set<Address> deviceAddresses = systemDeviceMap.getDeviceAddresses(i);	
+			final Set<Address> deviceAddresses = systemDeviceMap.getDeviceAddresses(i);
 			final List<Device> deviceRecords = deviceDbService.findByAddresses(deviceAddresses.stream().map(a -> a.address()).collect(Collectors.toSet()));
-			
+
 			Device deviceRecord = null;
 			if (Utilities.isEmpty(deviceRecords)) {
 				// New device
@@ -144,9 +144,9 @@ public class MeasurementEngine {
 					deviceRecord = deviceDbService.create(address, systemDeviceMap.hasAugmented(i));
 					rttMeasurementJobScheduler.start(deviceRecord);
 					if (deviceRecord.isAugmented()) {
-						augmentedMeasurementJobScheduler.start(deviceRecord);						
+						augmentedMeasurementJobScheduler.start(deviceRecord);
 					}
-				}				
+				}
 			} else {
 				// Existing device
 				deviceRecord = specifyDevice(deviceRecords); // It can happen that a device was considered as multiple device before, but now the new data shows the truth
@@ -160,7 +160,7 @@ public class MeasurementEngine {
 					needUpdate = true;
 				}
 				if (needUpdate) {
-					deviceDbService.update(deviceRecord);					
+					deviceDbService.update(deviceRecord);
 				}
 				if (!rttMeasurementJobScheduler.isScheduled(deviceRecord)) {
 					rttMeasurementJobScheduler.start(deviceRecord);
@@ -171,11 +171,11 @@ public class MeasurementEngine {
 					augmentedMeasurementJobScheduler.stop(List.of(deviceRecord));
 				}
 			}
-			
+
 			// Handle systems
 			final Set<String> deviceSystems = systemDeviceMap.getDeviceSystems(i);
-			final List<System> toSave = new ArrayList<>(deviceSystems.size()); 
-			
+			final List<System> toSave = new ArrayList<>(deviceSystems.size());
+
 			final List<System> systemRecordsByDevice = systemDbService.findByDeviceId(deviceRecord.getId());
 			for (final System sysRecord : systemRecordsByDevice) {
 				if (!deviceSystems.contains(sysRecord.getName())) {
@@ -185,7 +185,7 @@ public class MeasurementEngine {
 			}
 			systemDbService.save(toSave);
 			toSave.clear();
-			
+
 			final List<System> systemRecords = systemDbService.findByNames(deviceSystems);
 			for (final String sysName : deviceSystems) {
 				boolean systemExists = false;
@@ -206,47 +206,47 @@ public class MeasurementEngine {
 			}
 			systemDbService.save(toSave);
 		}
-		
+
 		return newSysCnt;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private String selectAddress(final Set<Address> addresses) {
 		logger.debug("selectAddress started");
-		
+
 		Address selected = null;
-		
+
 		for (final Address address : addresses) {
 			if (address.type() == AddressType.MAC) {
 				// not happens in theory
 				continue;
 			}
-			
+
 			if (selected == null || selected.type() == AddressType.HOSTNAME) {
 				selected = address;
 			}
-			
+
 			if (selected.deviceRelated() && selected.type() != AddressType.HOSTNAME) {
 				break;
-			}			
+			}
 		}
-		
+
 		return selected.address();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private Device specifyDevice(final List<Device> devices) {
 		logger.debug("selectDevices started");
-		
+
 		Device selected = devices.getFirst();
-		
+
 		if (devices.size() > 1) {
 			for (final Device device : devices) {
 				if (selected.isInactive() && !device.isInactive()) {
 					selected = device;
-					
-				} else if (selected.isInactive() == device.isInactive()) {						
-					if(!selected.isAugmented() && device.isAugmented()) {	
+
+				} else if (selected.isInactive() == device.isInactive()) {
+					if (!selected.isAugmented() && device.isAugmented()) {
 						selected = device;
 					} else if (selected.getCreatedAt().isAfter(device.getCreatedAt())) {
 						selected = device;
@@ -254,14 +254,14 @@ public class MeasurementEngine {
 				}
 			}
 		}
-		
+
 		return selected;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private int cleanDatabase() {
 		logger.debug("cleanDatabase started");
-		
+
 		return systemDbService.deleteSystemsWithoutDevice();
 	}
 

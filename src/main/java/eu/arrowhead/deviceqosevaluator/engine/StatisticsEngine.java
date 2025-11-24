@@ -55,6 +55,8 @@ public class StatisticsEngine {
 	@Autowired
 	private StatDbService statDbService;
 
+	private static final int hundred = 100;
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -131,20 +133,20 @@ public class StatisticsEngine {
 	//-------------------------------------------------------------------------------------------------
 	private boolean hasData(final List<StatEntity> data) {
 		logger.debug("hasData started");
-		
+
 		if (Utilities.isEmpty(data)) {
 			return false;
 		}
-		
+
 		for (final StatEntity stat : data) {
 			if (stat.getMean() != -1) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private double calculateMetricScore(final OidMetric metric, final Double scaleTo, final Double weight, final List<StatEntity> data, final double worstStat) {
 		logger.debug("calculateMetricScore started");
@@ -152,7 +154,7 @@ public class StatisticsEngine {
 		if (Utilities.isEmpty(data)) {
 			return worstStat * weight;
 		}
-		
+
 		if (metric == OidMetric.CURRENT) {
 			data.sort(Comparator.comparing(StatEntity::getTimestamp)); // ascending
 			return getValue(metric, data.getLast(), scaleTo, worstStat) * weight;
@@ -207,16 +209,19 @@ public class StatisticsEngine {
 		case CURRENT:
 			value = stat.getCurrent();
 			break;
+
+		default:
+			logger.error("Unhandled OID metric: " + metric);
 		}
 
 		if (value == -1) {
 			return worstStat;
 		}
-		
+
 		if (scaleTo != null) {
-			value = (value / scaleTo) * 100;
+			value = (value / scaleTo) * hundred;
 		}
-		
+
 		return value;
 	}
 }

@@ -44,7 +44,7 @@ public class RttMeasurementDriver {
 	//-------------------------------------------------------------------------------------------------
 	public Long measure(final String address, final int port) throws IOException {
 		Long result = null;
-		try (final Socket socket = new Socket()) {
+		try (Socket socket = new Socket()) {
 			final InetSocketAddress socketAddress = new InetSocketAddress(address, port);
 
 			final Instant start = Instant.now();

@@ -24,45 +24,45 @@ import org.apache.commons.statistics.descriptive.Mean;
 import org.apache.commons.statistics.descriptive.Median;
 import org.apache.commons.statistics.descriptive.Min;
 
-public class Stat {
+public final class Stat {
 	//=================================================================================================
 	// members
-	
+
 	private static final Median median = Median.withDefaults();
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static double min(final double[] values) {
 		return round(Min.of(values).getAsDouble());
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static double max(final double[] values) {
 		return round(Max.of(values).getAsDouble());
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static double mean(final double[] values) {
 		return round(Mean.of(values).getAsDouble());
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static double median(final double[] values) {
 		return round(median.evaluate(values));
 	}
-	
+
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private static double round(final double value) {
 		return BigDecimal.valueOf(value)
 				.setScale(2, RoundingMode.HALF_UP)
 				.doubleValue();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private Stat() {
 		throw new UnsupportedOperationException();

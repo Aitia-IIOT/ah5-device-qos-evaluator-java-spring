@@ -43,7 +43,7 @@ public class MeasurementOrganizerJob extends QuartzJobBean {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+	protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("MeasurementOrganizerJob.executeInternal started");
 
 		try {

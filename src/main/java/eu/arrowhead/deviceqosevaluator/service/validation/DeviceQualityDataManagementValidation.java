@@ -39,55 +39,55 @@ public class DeviceQualityDataManagementValidation {
 
 	//-------------------------------------------------------------------------------------------------
 	// members
-	
+
 	@Autowired
 	private PageValidator pageValidator;
-	
+
 	@Autowired
 	private SystemNameValidator sysNameValidator;
-	
+
 	@Autowired
-	private DeviceQualityDataManagementNormalization normalizer; 
-	
+	private DeviceQualityDataManagementNormalization normalizer;
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	// VALIDATION
 
 	//-------------------------------------------------------------------------------------------------
 	public void validateQueryRequest(final QoSDeviceStatQueryRequestDTO dto, final String origin) {
 		logger.debug("validateQueryRequest");
-		
+
 		if (dto == null) {
 			throw new InvalidParameterException("Request payload is missing", origin);
 		}
-		
+
 		pageValidator.validatePageParameter(dto.pagination(), StatEntity.SORTABLE_FIELDS_BY, origin);
-		
+
 		if (Utilities.isEmpty(dto.metricGroup())) {
 			throw new InvalidParameterException("metricGroup is missing", origin);
 		}
 	}
-	
+
 	// VALIDATE & NORMALIZE
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public QoSDeviceStatQueryRequestDTO validateAndNormalizeQueryRequest(final QoSDeviceStatQueryRequestDTO dto, final String origin) {
 		logger.debug("validateAndNormalizeQueryRequest");
-		
+
 		validateQueryRequest(dto, origin);
 		final QoSDeviceStatQueryRequestDTO normalized = normalizer.normalizeQoSDeviceStatQueryRequestDTO(dto);
-		
+
 		if (!Utilities.isEnumValue(normalized.metricGroup(), OidGroup.class)) {
 			throw new InvalidParameterException("Invalid metricGroup: " + normalized.metricGroup(), origin);
 		}
-		
+
 		ZonedDateTime from = null;
 		ZonedDateTime to = null;
 		try {
-			if (!Utilities.isEmpty(normalized.from())) {				
+			if (!Utilities.isEmpty(normalized.from())) {
 				from = Utilities.parseUTCStringToZonedDateTime(normalized.from());
 			}
 		} catch (final DateTimeParseException ex) {
@@ -95,18 +95,18 @@ public class DeviceQualityDataManagementValidation {
 		}
 		try {
 			if (!Utilities.isEmpty(normalized.to())) {
-				to = Utilities.parseUTCStringToZonedDateTime(normalized.to());				
+				to = Utilities.parseUTCStringToZonedDateTime(normalized.to());
 			}
 		} catch (final DateTimeParseException ex) {
 			throw new InvalidParameterException("Invalid 'to' time: " + normalized.to(), origin);
 		}
-		
+
 		if (from != null && to != null) {
 			if (from.isAfter(to)) {
 				throw new InvalidParameterException("Invalid period", origin);
-			}			
+			}
 		}
-		
+
 		if (!Utilities.isEmpty(normalized.aggregation())) {
 			normalized.aggregation().forEach(metric -> {
 				if (!Utilities.isEnumValue(metric.trim().toUpperCase(), OidMetric.class)) {
@@ -114,17 +114,17 @@ public class DeviceQualityDataManagementValidation {
 				}
 			});
 		}
-		
+
 		if (!Utilities.isEmpty(normalized.systemNames())) {
 			normalized.systemNames().forEach(sys -> {
 				try {
 					sysNameValidator.validateSystemName(sys);
-				} catch (final  InvalidParameterException ex) {
+				} catch (final InvalidParameterException ex) {
 					throw new InvalidParameterException(ex.getMessage(), origin);
 				}
 			});
 		}
-		
+
 		return normalized;
 	}
 }

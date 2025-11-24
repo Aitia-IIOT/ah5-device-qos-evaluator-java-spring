@@ -46,52 +46,52 @@ public class AugmentedMeasurementDriver {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private DeviceQoSEvaluatorSystemInfo sysInfo;
-	
-	private static final int port= 59473;
+
+	private static final int port = 59473;
 	private static final String path = "/device-qos";
 	private static final String paramKey = "batch";
-	private static final int deviceClientWindowSize = 30; // sec 
-	
-	private static final int connectionTimeout= 5000; // ms
+	private static final int deviceClientWindowSize = 30; // sec
+
+	private static final int connectionTimeout = 5000; // ms
 	private static final int socketTimeout = 5000; // ms
-	
+
 	private String batchSize;
 	private WebClient client;
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public AugmentedMeasurementsDTO fetch(final String address) {
 		final UriComponents uri = HttpUtilities.createURI(Constants.HTTP, address, port, path, paramKey, batchSize);
 		final RequestBodySpec spec = client.method(HttpMethod.GET).uri(uri.toUri());
 		return spec.retrieve().bodyToMono(AugmentedMeasurementsDTO.class).block(Duration.ofMillis(socketTimeout));
 	}
-	
+
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
 	private void init() {
 		final HttpClient httpCLient = HttpClient.create()
-		.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
-		.doOnConnected(this::initConnectionHandlers);
-		
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
+				.doOnConnected(this::initConnectionHandlers);
+
 		this.client = createWebClient(httpCLient);
 		long frequency = sysInfo.getAugmentedMeasurementJobInterval();
 		this.batchSize = frequency > deviceClientWindowSize ? String.valueOf(deviceClientWindowSize) : String.valueOf(frequency);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private void initConnectionHandlers(final Connection connection) {
 		connection.addHandlerLast(new ReadTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
 		connection.addHandlerLast(new WriteTimeoutHandler(socketTimeout, TimeUnit.MILLISECONDS));
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private WebClient createWebClient(final HttpClient client) {
 		final Builder builder = WebClient

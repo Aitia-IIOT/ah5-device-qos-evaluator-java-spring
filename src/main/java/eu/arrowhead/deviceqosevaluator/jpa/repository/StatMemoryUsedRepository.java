@@ -37,7 +37,7 @@ public interface StatMemoryUsedRepository extends RefreshableRepository<StatMemo
 
 	//-------------------------------------------------------------------------------------------------
 	public Page<StatMemoryUsed> findAllByIdIn(final Collection<Long> ids, final Pageable pageable);
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<StatMemoryUsed> findAllByUuidAndTimestampAfter(final UUID uuid, final ZonedDateTime timestamp);
 
@@ -46,10 +46,10 @@ public interface StatMemoryUsedRepository extends RefreshableRepository<StatMemo
 
 	//-------------------------------------------------------------------------------------------------
 	public Page<StatMemoryUsed> findAllByUuidInAndTimestampBetween(final Set<UUID> uuids, final ZonedDateTime start, final ZonedDateTime end, final Pageable pageable);
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public boolean existsByUuid(final UUID uuid);
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public void deleteAllByTimestampBefore(final ZonedDateTime timestamp);
 }

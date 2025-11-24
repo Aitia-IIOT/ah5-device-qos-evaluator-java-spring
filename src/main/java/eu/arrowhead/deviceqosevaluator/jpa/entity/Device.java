@@ -33,34 +33,34 @@ public class Device {
 
 	//=================================================================================================
 	// members
-	
+
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "createdAt");
 	public static final String DEFAULT_SORT_FIELD = "createdAt";
-	
+
 	@Id
 	private UUID id;
-	
+
 	@Column(nullable = false, unique = true, length = ArrowheadEntity.VARCHAR_LARGE)
 	private String address;
-	
+
 	@Column(nullable = false)
 	private Integer rttPort;
-	
+
 	@Column(nullable = false, columnDefinition = "INT(1)")
 	private boolean augmented = false;
-	
+
 	@Column(nullable = false, columnDefinition = "INT(1)")
 	private boolean inactive = false;
-	
+
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
-	
+
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
@@ -73,9 +73,10 @@ public class Device {
 	public void onUpdate() {
 		this.updatedAt = Utilities.utcNow();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
-	public Device() {}
+	public Device() {
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	public Device(final UUID id, final String address, final Integer rttPort, final boolean augmented, final boolean inactive) {

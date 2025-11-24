@@ -41,20 +41,20 @@ public class DeviceDbService {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private DeviceRepository deviceRepo;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public Optional<Device> findById(final UUID id) {
 		logger.debug("findByAddresses started");
-		
-		try {			
+
+		try {
 			return deviceRepo.findById(id);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
@@ -62,12 +62,12 @@ public class DeviceDbService {
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<Device> findByAddresses(final Set<String> addresses) {
 		logger.debug("findByAddresses started");
-		
-		try {			
+
+		try {
 			return deviceRepo.findAllByAddressIn(addresses);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
@@ -75,26 +75,26 @@ public class DeviceDbService {
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public Page<Device> getPage(final Pageable page) {
 		logger.debug("findByAddresses started");
-		
-		try {			
+
+		try {
 			return deviceRepo.findAll(page);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
-		
+
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Device create(final String address, final boolean augmented) {
 		logger.debug("create started");
-		
+
 		try {
 			return deviceRepo.saveAndFlush(new Device(UUID.randomUUID(), address, null, augmented, false));
 		} catch (final Exception ex) {
@@ -103,44 +103,44 @@ public class DeviceDbService {
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Device update(final Device device) {
 		logger.debug("update started");
 		Assert.notNull(device.getId(), "device.id is null");
 		Assert.isTrue(!Utilities.isEmpty(device.getAddress()), "device.adrress is empty");
-		
+
 		try {
-			return deviceRepo.saveAndFlush(device);			
+			return deviceRepo.saveAndFlush(device);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void update(final Iterable<Device> devices) {
 		logger.debug("update started");
-		
+
 		try {
-			deviceRepo.saveAllAndFlush(devices);			
+			deviceRepo.saveAllAndFlush(devices);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
 			throw new InternalServerError("Database operation error");
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void remove(final Iterable<Device> devices) {
 		logger.debug("update started");
-		
+
 		try {
-			deviceRepo.deleteAllInBatch(devices);			
+			deviceRepo.deleteAllInBatch(devices);
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);

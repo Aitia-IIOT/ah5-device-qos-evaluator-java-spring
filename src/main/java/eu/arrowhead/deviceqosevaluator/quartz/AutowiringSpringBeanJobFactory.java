@@ -24,25 +24,25 @@ import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
 public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
 
-    //=================================================================================================
+	//=================================================================================================
 	// members
-	
+
 	private AutowireCapableBeanFactory beanFactory;
 
-    //=================================================================================================
+	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.beanFactory = applicationContext.getAutowireCapableBeanFactory();
-    }
+	public void setApplicationContext(final ApplicationContext applicationContext) {
+		this.beanFactory = applicationContext.getAutowireCapableBeanFactory();
+	}
 
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Override
-    protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-        Object jobInstance = super.createJobInstance(bundle);
-        beanFactory.autowireBean(jobInstance); // Enable @Autowired in Quartz jobs
-        return jobInstance;
-    }
+	protected Object createJobInstance(final TriggerFiredBundle bundle) throws Exception {
+		final Object jobInstance = super.createJobInstance(bundle);
+		beanFactory.autowireBean(jobInstance); // Enable @Autowired in Quartz jobs
+		return jobInstance;
+	}
 }

@@ -106,8 +106,8 @@ public class SystemDeviceMap {
 
 		if (system.device() != null) {
 			for (final AddressDTO addr : system.device().addresses()) {
-				if (Utilities.isEnumValue(addr.type(), AddressType.class) &&
-						!addr.type().equalsIgnoreCase(AddressType.MAC.name())) {
+				if (Utilities.isEnumValue(addr.type(), AddressType.class)
+						&& !addr.type().equalsIgnoreCase(AddressType.MAC.name())) {
 					addresses.add(new Address(addr.address(), AddressType.valueOf(addr.type()), true));
 				}
 			}
@@ -133,6 +133,7 @@ public class SystemDeviceMap {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
 	private boolean supportsAugmented(final SystemResponseDTO system) {
 		logger.debug("findDevice started");
 
@@ -167,7 +168,7 @@ public class SystemDeviceMap {
 
 	//=================================================================================================
 	// nested class
-	private class Bool {
+	private final class Bool {
 
 		//=================================================================================================
 		// members

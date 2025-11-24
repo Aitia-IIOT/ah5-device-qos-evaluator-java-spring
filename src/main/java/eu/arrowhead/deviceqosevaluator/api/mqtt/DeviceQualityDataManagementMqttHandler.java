@@ -72,7 +72,7 @@ public class DeviceQualityDataManagementMqttHandler extends MqttTopicHandler {
 		case Constants.SERVICE_OP_RELOAD:
 			responsePayload = reload();
 			break;
-			
+
 		default:
 			throw new InvalidParameterException("Unknown operation: " + request.getOperation());
 		}
@@ -89,11 +89,11 @@ public class DeviceQualityDataManagementMqttHandler extends MqttTopicHandler {
 
 		return mgmtService.query(requestPayload, baseTopic() + Constants.SERVICE_OP_QUERY);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private String reload() {
 		logger.debug("DeviceQualityDataManagementMqttHandler.reload started");
-		
+
 		return mgmtService.reload(baseTopic() + Constants.SERVICE_OP_RELOAD);
 	}
 

@@ -48,15 +48,15 @@ public class DeviceQualityDataManagementAPI {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private DeviceQualityDataManagementService mgmtService;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Operation(summary = "Returns the statistic records according to the given filters")
 	@ApiResponses(value = {
@@ -74,11 +74,11 @@ public class DeviceQualityDataManagementAPI {
 	@PostMapping(path = DeviceQoSEvaluatorConstants.HTTP_API_OP_QUERY_PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody QoSDeviceStatQueryResponseDTO query(final @RequestBody QoSDeviceStatQueryRequestDTO dto) {
 		logger.debug("query started");
-		
+
 		final String origin = HttpMethod.POST.name() + " " + DeviceQoSEvaluatorConstants.HTTP_API_DEVICE_QUALITY_DATA_MANAGEMENT_PATH + DeviceQoSEvaluatorConstants.HTTP_API_OP_QUERY_PATH;
 		return mgmtService.query(dto, origin);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Operation(summary = "Reloads and rebuilds the measurement map (device-systems) from the Service Registry Core System")
 	@ApiResponses(value = {
@@ -92,7 +92,7 @@ public class DeviceQualityDataManagementAPI {
 	@GetMapping(path = DeviceQoSEvaluatorConstants.HTTP_API_OP_RELOAD_PATH, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String reload() {
 		logger.debug("reload started");
-		
+
 		final String origin = HttpMethod.GET.name() + " " + DeviceQoSEvaluatorConstants.HTTP_API_DEVICE_QUALITY_DATA_MANAGEMENT_PATH + DeviceQoSEvaluatorConstants.HTTP_API_OP_RELOAD_PATH;
 		return mgmtService.reload(origin);
 	}

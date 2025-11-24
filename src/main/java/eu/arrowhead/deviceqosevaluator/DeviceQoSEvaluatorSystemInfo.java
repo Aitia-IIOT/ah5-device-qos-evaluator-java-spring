@@ -44,7 +44,7 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 
 	@Value(DeviceQoSEvaluatorConstants.$RTT_MEASUREMENT_JOB_INTERVAL_WD)
 	private long rttMeasurementJobInterval;
-	
+
 	@Value(DeviceQoSEvaluatorConstants.$RTT_MEASUREMENT_TIMEOUT_WD)
 	private int rttMeasurementTimeout;
 
@@ -56,7 +56,7 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 
 	@Value(DeviceQoSEvaluatorConstants.$CLEANING_JOB_INTERVAL_WD)
 	private long cleaningJobInterval;
-	
+
 	@Value(DeviceQoSEvaluatorConstants.$RAW_MEASUREMENT_DATA_MAX_AGE_WD)
 	private int rawMeasurementDataMaxAge;
 
@@ -257,7 +257,7 @@ public class DeviceQoSEvaluatorSystemInfo extends SystemInfo {
 				.operations(Set.of(Constants.SERVICE_OP_FILTER, Constants.SERVICE_OP_SORT))
 				.build();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private InterfaceModel getMqttServiceInterfaceForDeviceQualityDataManagementService() {
 		if (!isMqttApiEnabled()) {

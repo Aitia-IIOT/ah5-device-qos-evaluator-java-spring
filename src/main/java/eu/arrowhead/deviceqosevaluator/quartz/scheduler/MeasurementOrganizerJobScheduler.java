@@ -43,11 +43,11 @@ public class MeasurementOrganizerJobScheduler {
 
 	@Autowired
 	private Scheduler scheduler;
-	
+
 	private JobDetail jobDetail;
 	private Trigger currentTrigger;
 	private boolean jobScheduled = false;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -56,20 +56,20 @@ public class MeasurementOrganizerJobScheduler {
 	//-------------------------------------------------------------------------------------------------
 	public synchronized void start() throws SchedulerException {
 		logger.debug("MeasurementOrganizerJobScheduler.start started");
-		
+
 		if (jobScheduled) {
 			return;
 		}
-		
+
 		jobDetail = JobBuilder.newJob(MeasurementOrganizerJob.class)
-                .withIdentity(DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB)
-                .storeDurably()
-                .build();
+				.withIdentity(DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB)
+				.storeDurably()
+				.build();
 
 		currentTrigger = TriggerBuilder.newTrigger()
 				.withIdentity(DeviceQoSEvaluatorConstants.MEASUREMENT_ORGANIZER_JOB_TRIGGER)
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-						.withIntervalInMilliseconds(sysInfo.getMeasurementOrganizerJobInterval() * 1000) // from sec to milisec
+						.withIntervalInMilliseconds(sysInfo.getMeasurementOrganizerJobInterval() * DeviceQoSEvaluatorConstants.SEC_TO_MS) // from sec to milisec
 						.repeatForever())
 				.build();
 
@@ -82,7 +82,7 @@ public class MeasurementOrganizerJobScheduler {
 	//-------------------------------------------------------------------------------------------------
 	public synchronized void stop() throws SchedulerException {
 		logger.debug("MeasurementOrganizerJobScheduler.stop started");
-		
+
 		if (!jobScheduled) {
 			return;
 		}

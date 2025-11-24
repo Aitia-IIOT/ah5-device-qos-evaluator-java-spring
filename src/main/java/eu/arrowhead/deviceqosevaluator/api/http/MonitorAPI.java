@@ -35,7 +35,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RequestMapping(DeviceQoSEvaluatorConstants.HTTP_API_MONITOR_PATH)
 @SecurityRequirement(name = Constants.SECURITY_REQ_AUTHORIZATION)
 public class MonitorAPI {
-	
+
 	//=================================================================================================
 	// methods
 
