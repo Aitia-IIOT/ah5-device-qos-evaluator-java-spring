@@ -97,11 +97,6 @@ public class DeviceQualityDataManagementService {
 			}
 			return results.getFirst() + " more systems found, " + results.getSecond() + " systems removed";
 
-		} catch (final ExternalServerError ex) {
-			logger.error(ex.getMessage());
-			logger.debug(ex);
-			throw new ExternalServerError(ex.getMessage(), origin);
-
 		} catch (final InternalServerError | SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
