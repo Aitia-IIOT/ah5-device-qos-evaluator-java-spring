@@ -109,7 +109,7 @@ public class DeviceDbService {
 	public Device update(final Device device) {
 		logger.debug("update started");
 		Assert.notNull(device.getId(), "device.id is null");
-		Assert.isTrue(!Utilities.isEmpty(device.getAddress()), "device.adrress is empty");
+		Assert.isTrue(!Utilities.isEmpty(device.getAddress()), "device.address is empty");
 
 		try {
 			return deviceRepo.saveAndFlush(device);

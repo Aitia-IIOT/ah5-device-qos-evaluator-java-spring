@@ -228,7 +228,7 @@ public class StatDbService {
 
 		try {
 			final ZonedDateTime start = from == null ? Utilities.utcNow().minusYears(1) : from;
-			final ZonedDateTime end = to == null ? Utilities.utcNow().plusMinutes(1) : from;
+			final ZonedDateTime end = to == null ? Utilities.utcNow().plusMinutes(1) : to;
 
 			Set<UUID> devices = new HashSet<>();
 			if (!Utilities.isEmpty(systemNames)) {

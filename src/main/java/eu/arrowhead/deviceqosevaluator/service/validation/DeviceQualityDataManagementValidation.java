@@ -94,7 +94,7 @@ public class DeviceQualityDataManagementValidation {
 
 		if (!Utilities.isEmpty(normalized.aggregation())) {
 			normalized.aggregation().forEach(metric -> {
-				if (!Utilities.isEnumValue(metric.trim().toUpperCase(), OidMetric.class)) {
+				if (!Utilities.isEnumValue(metric, OidMetric.class)) {
 					throw new InvalidParameterException("Invalid aggregation: " + metric, origin);
 				}
 			});

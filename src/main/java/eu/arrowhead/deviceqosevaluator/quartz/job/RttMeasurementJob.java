@@ -80,7 +80,7 @@ public class RttMeasurementJob extends QuartzJobBean {
 		try {
 			final Optional<Device> optional = deviceDbService.findById(deviceId);
 			if (optional.isEmpty()) {
-				logger.warn("Device not exists: " + deviceId.toString());
+				logger.warn("Device does not exist: " + deviceId.toString());
 				return;
 			}
 			final Device device = optional.get();

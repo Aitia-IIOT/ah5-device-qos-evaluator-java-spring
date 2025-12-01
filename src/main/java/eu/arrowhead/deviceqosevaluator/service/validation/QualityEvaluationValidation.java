@@ -62,7 +62,7 @@ public class QualityEvaluationValidation {
 
 	//-------------------------------------------------------------------------------------------------
 	public Pair<List<String>, QoSDeviceDataEvaluationConfigDTO> validateAndNormalizeQoSEvaluationRequest(final List<String> systems, final QoSDeviceDataEvaluationConfigDTO config, final boolean needThreshold, final String origin) {
-		logger.debug("validateAndNormalizeQoSEvaluationRequestDTO started");
+		logger.debug("validateAndNormalizeQoSEvaluationRequest started");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		validateQoSEvaluationRequest(systems, config, needThreshold, origin);
@@ -99,7 +99,7 @@ public class QualityEvaluationValidation {
 
 	//-------------------------------------------------------------------------------------------------
 	private void validateQoSEvaluationRequest(final List<String> systems, final QoSDeviceDataEvaluationConfigDTO config, final boolean needThreshold, final String origin) {
-		logger.debug("validateQoSEvaluationRequestDTO started");
+		logger.debug("validateQoSEvaluationRequest started");
 
 		if (Utilities.isEmpty(systems)) {
 			throw new InvalidParameterException("System list is empty", origin);

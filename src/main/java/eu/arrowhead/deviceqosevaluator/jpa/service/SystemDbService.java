@@ -79,7 +79,7 @@ public class SystemDbService {
 
 	//-------------------------------------------------------------------------------------------------
 	public List<System> findByDeviceId(final UUID deviceId) {
-		logger.debug("findByDevice started");
+		logger.debug("findByDeviceId started");
 
 		try {
 			final Optional<Device> optional = deviceRepository.findById(deviceId);
