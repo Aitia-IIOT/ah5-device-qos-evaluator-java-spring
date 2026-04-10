@@ -80,8 +80,6 @@ public class QualityEvaluationNormalization {
 	//-------------------------------------------------------------------------------------------------
 	private List<Double> normalizeMetricWeights(final List<Double> weights, final int size) {
 		logger.debug("normalizeMetricWeights started");
-		
-		List<Double> normalized = new ArrayList<>(size);
 
 		if (Utilities.isEmpty(weights)) {
 			final double w = 1.0 / size;
@@ -89,12 +87,13 @@ public class QualityEvaluationNormalization {
 		}
 		
 		Assert.isTrue(!Utilities.containsNull(weights), "metric weights list contains empty element");
-
+		
 		double sum = 0;
 		for (final Double w : weights) {
 			sum += w;
 		}
 
+		List<Double> normalized = new ArrayList<>(size);
 		if (sum < TOLERANCE_BOTTOM || sum > TOLERANCE_TOP) {
 			for (final Double w : weights) {
 				normalized.add(w / sum);

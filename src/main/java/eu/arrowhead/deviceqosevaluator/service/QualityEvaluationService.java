@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +75,7 @@ public class QualityEvaluationService {
 	//-------------------------------------------------------------------------------------------------
 	public QoSEvaluationFilterResponseDTO filter(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("filter started");
+		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		try {
 			final List<String> systems = dto == null ? null : dto.providers();
@@ -108,6 +110,7 @@ public class QualityEvaluationService {
 	//-------------------------------------------------------------------------------------------------
 	public QoSEvaluationSortResponseDTO sort(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("sort started");
+		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		try {
 			final List<String> systems = dto == null ? null : dto.providers();

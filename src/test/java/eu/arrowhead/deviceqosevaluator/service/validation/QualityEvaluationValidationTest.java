@@ -319,6 +319,7 @@ public class QualityEvaluationValidationTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("checkstyle:MagicNumber")
 	@Test
 	public void testValidateAndNormalizeQoSEvaluationRequestInvalidTimeWindow2() {
 		final QoSDeviceDataEvaluationConfigDTO config = new QoSDeviceDataEvaluationConfigDTO(
@@ -340,6 +341,7 @@ public class QualityEvaluationValidationTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("checkstyle:MagicNumber")
 	@Test
 	public void testValidateAndNormalizeQoSEvaluationRequestInvalidParameterException() {
 		final QoSDeviceDataEvaluationConfigDTO config = new QoSDeviceDataEvaluationConfigDTO(

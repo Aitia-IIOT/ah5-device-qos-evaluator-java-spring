@@ -323,7 +323,7 @@ public class DeviceQualityDataManagementValidationTest {
 		verify(normalizer).normalizeQoSDeviceStatQueryRequestDTO(dto);
 		verify(sysNameValidator).validateSystemName("TestSystem");
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testValidateAndNormalizeQueryRequestOk2() {
