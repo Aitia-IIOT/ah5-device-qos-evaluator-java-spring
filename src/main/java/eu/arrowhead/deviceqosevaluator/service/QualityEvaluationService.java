@@ -101,7 +101,6 @@ public class QualityEvaluationService {
 			}
 
 			return new QoSEvaluationFilterResponseDTO(passedProviders, droppedProviders, warnings);
-
 		} catch (final JsonProcessingException ex) {
 			throw new InvalidParameterException("Invalid configuration payload", origin);
 		}
@@ -122,7 +121,7 @@ public class QualityEvaluationService {
 			final List<String> sortedProviders = new ArrayList<>();
 			final Map<String, List<String>> warnings = new HashMap<>();
 
-			evaluated.sort(Comparator.comparingDouble(SystemEvalModel::getScore)); //ascending
+			evaluated.sort(Comparator.comparingDouble(SystemEvalModel::getScore)); // ascending
 			for (final SystemEvalModel sysResult : evaluated) {
 				sortedProviders.add(sysResult.getName());
 				if (!Utilities.isEmpty(sysResult.getNoStat())) {
@@ -131,7 +130,6 @@ public class QualityEvaluationService {
 			}
 
 			return new QoSEvaluationSortResponseDTO(sortedProviders, warnings);
-
 		} catch (final JsonProcessingException ex) {
 			throw new InvalidParameterException("Invalid configuration payload", origin);
 		}

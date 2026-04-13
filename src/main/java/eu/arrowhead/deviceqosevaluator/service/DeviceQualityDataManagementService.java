@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ExternalServerError;
@@ -72,15 +73,19 @@ public class DeviceQualityDataManagementService {
 	//-------------------------------------------------------------------------------------------------
 	public QoSDeviceStatQueryResponseDTO query(final QoSDeviceStatQueryRequestDTO dto, final String origin) {
 		logger.debug("query started");
+		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		final QoSDeviceStatQueryRequestDTO normalized = validator.validateAndNormalizeQueryRequest(dto, origin);
 		final PageRequest pageRequest = pageService.getPageRequest(normalized.pagination(), Direction.DESC, StatEntity.SORTABLE_FIELDS_BY, StatEntity.DEFAULT_SORT_FIELD, origin);
 
 		try {
-			final Page<StatQueryResultModel> results = statDbService.query(normalized.systemNames(), Utilities.parseUTCStringToZonedDateTime(normalized.from()), Utilities.parseUTCStringToZonedDateTime(normalized.to()),
+			final Page<StatQueryResultModel> results = statDbService.query(
+					normalized.systemNames(),
+					Utilities.parseUTCStringToZonedDateTime(normalized.from()),
+					Utilities.parseUTCStringToZonedDateTime(normalized.to()),
 					OidGroup.valueOf(normalized.metricGroup()), pageRequest);
-			return dtoConverter.convertStatQueryResultModelPageToDTO(results, normalized.aggregation().stream().map(m -> OidMetric.valueOf(m)).collect(Collectors.toSet()));
 
+			return dtoConverter.convertStatQueryResultModelPageToDTO(results, normalized.aggregation().stream().map(m -> OidMetric.valueOf(m)).collect(Collectors.toSet()));
 		} catch (final InternalServerError ex) {
 			throw new InternalServerError(ex.getMessage(), origin);
 		}
@@ -89,14 +94,15 @@ public class DeviceQualityDataManagementService {
 	//-------------------------------------------------------------------------------------------------
 	public String reload(final String origin) {
 		logger.debug("reload started");
+		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		try {
 			final Pair<Integer, Integer> results = measurementEngine.organize();
 			if (results == null) {
 				return "Reload operation is already in proggress";
 			}
-			return results.getFirst() + " more systems found, " + results.getSecond() + " systems removed";
 
+			return results.getFirst() + " more systems found, " + results.getSecond() + " systems removed";
 		} catch (final ExternalServerError ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
