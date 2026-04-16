@@ -48,13 +48,13 @@ import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
 
 @ExtendWith(MockitoExtension.class)
-public class AugmentedMeasurementJobSchedulerTest {
+public class RttMeasurementJobSchedulerTest {
 
 	//=================================================================================================
 	// members
 
 	@InjectMocks
-	private AugmentedMeasurementJobScheduler testedScheduler;
+	private RttMeasurementJobScheduler testedScheduler;
 
 	@Mock
 	private DeviceQoSEvaluatorSystemInfo sysInfo;
@@ -95,7 +95,7 @@ public class AugmentedMeasurementJobSchedulerTest {
 				12345,
 				true,
 				false);
-		final JobKey jobKey = JobKey.jobKey(uuid + "_job_aug");
+		final JobKey jobKey = JobKey.jobKey(uuid + "_job_rtt");
 
 		when(scheduler.checkExists(jobKey)).thenReturn(true);
 
@@ -115,7 +115,7 @@ public class AugmentedMeasurementJobSchedulerTest {
 				12345,
 				true,
 				false);
-		final JobKey jobKey = JobKey.jobKey(uuid + "_job_aug");
+		final JobKey jobKey = JobKey.jobKey(uuid + "_job_rtt");
 
 		when(scheduler.checkExists(jobKey)).thenReturn(false);
 		when(scheduler.scheduleJob(any(JobDetail.class), any(Trigger.class))).thenReturn(new Date());
@@ -128,8 +128,8 @@ public class AugmentedMeasurementJobSchedulerTest {
 		verify(scheduler).checkExists(jobKey);
 		verify(scheduler).scheduleJob(jdCapture.capture(), triggerCapture.capture());
 
-		assertEquals(uuid + "_job_aug", jdCapture.getValue().getKey().getName());
-		assertEquals(uuid + "_trigger_aug", triggerCapture.getValue().getKey().getName());
+		assertEquals(uuid + "_job_rtt", jdCapture.getValue().getKey().getName());
+		assertEquals(uuid + "_trigger_rtt", triggerCapture.getValue().getKey().getName());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -173,8 +173,8 @@ public class AugmentedMeasurementJobSchedulerTest {
 				12345,
 				true,
 				false);
-		final TriggerKey triggerKey = TriggerKey.triggerKey(uuid + "_trigger_aug");
-		final JobKey jobKey = JobKey.jobKey(uuid + "_job_aug");
+		final TriggerKey triggerKey = TriggerKey.triggerKey(uuid + "_trigger_rtt");
+		final JobKey jobKey = JobKey.jobKey(uuid + "_job_rtt");
 
 		when(scheduler.unscheduleJob(triggerKey)).thenReturn(true);
 		when(scheduler.deleteJob(jobKey)).thenReturn(true);
@@ -215,7 +215,7 @@ public class AugmentedMeasurementJobSchedulerTest {
 				12345,
 				true,
 				false);
-		final JobKey jobKey = JobKey.jobKey(uuid + "_job_aug");
+		final JobKey jobKey = JobKey.jobKey(uuid + "_job_rtt");
 
 		when(scheduler.checkExists(jobKey)).thenReturn(true);
 
@@ -236,7 +236,7 @@ public class AugmentedMeasurementJobSchedulerTest {
 				12345,
 				true,
 				false);
-		final JobKey jobKey = JobKey.jobKey(uuid + "_job_aug");
+		final JobKey jobKey = JobKey.jobKey(uuid + "_job_rtt");
 
 		when(scheduler.checkExists(jobKey)).thenReturn(false);
 
