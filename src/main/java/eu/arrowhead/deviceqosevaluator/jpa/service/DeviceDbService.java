@@ -53,6 +53,7 @@ public class DeviceDbService {
 	//-------------------------------------------------------------------------------------------------
 	public Optional<Device> findById(final UUID id) {
 		logger.debug("findById started");
+		Assert.notNull(id, "id is null");
 
 		try {
 			return deviceRepo.findById(id);
@@ -66,6 +67,8 @@ public class DeviceDbService {
 	//-------------------------------------------------------------------------------------------------
 	public List<Device> findByAddresses(final Set<String> addresses) {
 		logger.debug("findByAddresses started");
+		Assert.isTrue(!Utilities.isEmpty(addresses), "address set is empty");
+		Assert.isTrue(!Utilities.containsNullOrEmpty(addresses), "address set contains empty element");
 
 		try {
 			return deviceRepo.findAllByAddressIn(addresses);
@@ -79,6 +82,7 @@ public class DeviceDbService {
 	//-------------------------------------------------------------------------------------------------
 	public Page<Device> getPage(final Pageable page) {
 		logger.debug("getPage started");
+		Assert.notNull(page, "page is null");
 
 		try {
 			return deviceRepo.findAll(page);
@@ -94,6 +98,7 @@ public class DeviceDbService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Device create(final String address, final boolean augmented) {
 		logger.debug("create started");
+		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
 
 		try {
 			return deviceRepo.saveAndFlush(new Device(UUID.randomUUID(), address, null, augmented, false));
@@ -108,6 +113,7 @@ public class DeviceDbService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Device update(final Device device) {
 		logger.debug("update started");
+		Assert.notNull(device, "device is null");
 		Assert.notNull(device.getId(), "device.id is null");
 		Assert.isTrue(!Utilities.isEmpty(device.getAddress()), "device.address is empty");
 
