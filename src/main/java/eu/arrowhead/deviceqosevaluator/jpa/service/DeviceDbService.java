@@ -130,6 +130,8 @@ public class DeviceDbService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void update(final Iterable<Device> devices) {
 		logger.debug("update started");
+		Assert.notNull(devices, "devices is null");
+		Assert.isTrue(!Utilities.containsNull(devices), "devices contains null");
 
 		try {
 			deviceRepo.saveAllAndFlush(devices);
@@ -144,6 +146,7 @@ public class DeviceDbService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void remove(final Iterable<Device> devices) {
 		logger.debug("remove started");
+		Assert.notNull(devices, "devices is null");
 
 		try {
 			deviceRepo.deleteAllInBatch(devices);

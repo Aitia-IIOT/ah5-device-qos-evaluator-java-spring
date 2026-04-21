@@ -16,12 +16,16 @@
  *******************************************************************************/
 package eu.arrowhead.deviceqosevaluator.jpa.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -283,5 +287,184 @@ public class DeviceDbServiceTest {
 			mockedStatic.verify(() -> UUID.randomUUID());
 			verify(deviceRepo).saveAndFlush(device);
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate1DeviceNull() {
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.update((Device) null));
+
+		assertEquals("device is null", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate1DeviceIdNull() {
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.update(new Device()));
+
+		assertEquals("device.id is null", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate1DeviceAddressNull() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, null, null, false, false);
+
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.update(device));
+
+		assertEquals("device.address is empty", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate1DeviceAddressEmpty() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "", null, false, false);
+
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.update(device));
+
+		assertEquals("device.address is empty", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate1InternalServerError() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", null, false, false);
+
+		when(deviceRepo.saveAndFlush(device)).thenThrow(RuntimeException.class);
+
+		final Throwable ex = assertThrows(
+				InternalServerError.class,
+				() -> service.update(device));
+
+		assertEquals("Database operation error", ex.getMessage());
+
+		verify(deviceRepo).saveAndFlush(device);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate1Ok() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", null, false, false);
+
+		when(deviceRepo.saveAndFlush(device)).thenReturn(device);
+
+		final Device result = service.update(device);
+
+		assertEquals(device, result);
+
+		verify(deviceRepo).saveAndFlush(device);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate2InputNull() {
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.update((Iterable<Device>) null));
+
+		assertEquals("devices is null", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate2InputContainsNull() {
+		final List<Device> list = new ArrayList<>(1);
+		list.add(null);
+
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.update(list));
+
+		assertEquals("devices contains null", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate2InternalServerError() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", null, false, false);
+
+		when(deviceRepo.saveAllAndFlush(List.of(device))).thenThrow(RuntimeException.class);
+
+		final Throwable ex = assertThrows(
+				InternalServerError.class,
+				() -> service.update(List.of(device)));
+
+		assertEquals("Database operation error", ex.getMessage());
+
+		verify(deviceRepo).saveAllAndFlush(List.of(device));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdate2Ok() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", null, false, false);
+
+		when(deviceRepo.saveAllAndFlush(List.of(device))).thenReturn(List.of(device));
+
+		assertDoesNotThrow(() -> service.update(List.of(device)));
+
+		verify(deviceRepo).saveAllAndFlush(List.of(device));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveInputNull() {
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.remove(null));
+
+		assertEquals("devices is null", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveInternalServerError() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", null, false, false);
+
+		doThrow(RuntimeException.class).when(deviceRepo).deleteAllInBatch((List.of(device)));
+
+		final Throwable ex = assertThrows(
+				InternalServerError.class,
+				() -> service.remove(List.of(device)));
+
+		assertEquals("Database operation error", ex.getMessage());
+
+		verify(deviceRepo).deleteAllInBatch(List.of(device));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveOk() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", null, false, false);
+
+		doNothing().when(deviceRepo).deleteAllInBatch((List.of(device)));
+
+		assertDoesNotThrow(() -> service.remove(List.of(device)));
+
+		verify(deviceRepo).deleteAllInBatch(List.of(device));
 	}
 }
