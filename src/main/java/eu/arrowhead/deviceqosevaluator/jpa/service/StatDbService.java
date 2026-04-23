@@ -134,6 +134,7 @@ public class StatDbService {
 		logger.debug("getByDeviceIdAfterTimestamp started");
 		Assert.notNull(oidGroup, "oidGroup is null");
 		Assert.notNull(deviceId, "deviceId is null");
+		Assert.notNull(timestamp, "timestamp is null");
 
 		final List<StatEntity> result = new ArrayList<>();
 		try {
@@ -161,7 +162,6 @@ public class StatDbService {
 			}
 
 			return result;
-
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
@@ -284,11 +284,11 @@ public class StatDbService {
 				if (!deviceSysCache.containsKey(stat.getUuid())) {
 					deviceSysCache.put(stat.getUuid(), systemRepo.findAllByDevice_Id(stat.getUuid()));
 				}
+
 				results.add(new StatQueryResultModel(oidGroup, stat, deviceSysCache.get(stat.getUuid())));
 			}
 
 			return new PageImpl<>(results, pageable, total);
-
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);
@@ -306,6 +306,7 @@ public class StatDbService {
 		if (Utilities.isEmpty(devices)) {
 			return rttStatRepo.findAllByTimestampBetween(start, end, pagination);
 		}
+
 		return rttStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
 
@@ -316,6 +317,7 @@ public class StatDbService {
 		if (Utilities.isEmpty(devices)) {
 			return cpuStatRepo.findAllByTimestampBetween(start, end, pagination);
 		}
+
 		return cpuStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
 
@@ -326,6 +328,7 @@ public class StatDbService {
 		if (Utilities.isEmpty(devices)) {
 			return memoryStatRepo.findAllByTimestampBetween(start, end, pagination);
 		}
+
 		return memoryStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
 
@@ -336,6 +339,7 @@ public class StatDbService {
 		if (Utilities.isEmpty(devices)) {
 			return netEgressStatRepo.findAllByTimestampBetween(start, end, pagination);
 		}
+
 		return netEgressStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
 
@@ -346,6 +350,7 @@ public class StatDbService {
 		if (Utilities.isEmpty(devices)) {
 			return netIngressStatRepo.findAllByTimestampBetween(start, end, pagination);
 		}
+
 		return netIngressStatRepo.findAllByUuidInAndTimestampBetween(devices, start, end, pagination);
 	}
 }
