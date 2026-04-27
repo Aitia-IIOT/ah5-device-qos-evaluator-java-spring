@@ -20,11 +20,16 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -179,5 +184,104 @@ public class SystemDbServiceTest {
 		assertEquals(sys, result.get(0));
 
 		verify(systemRepo).findAllByNameIn(List.of("TestSystem"));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFindByDeviceIdInputNull() {
+		final Throwable ex = assertThrows(
+				IllegalArgumentException.class,
+				() -> service.findByDeviceId(null));
+
+		assertEquals("deviceId is null", ex.getMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFindByDeviceIdInternalServerError() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+
+		when(deviceRepository.findById(deviceId)).thenThrow(RuntimeException.class);
+
+		final Throwable ex = assertThrows(
+				InternalServerError.class,
+				() -> service.findByDeviceId(deviceId));
+
+		assertEquals("Database operation error", ex.getMessage());
+
+		verify(deviceRepository).findById(deviceId);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFindByDeviceIdUnknownDevice() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+
+		when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
+
+		final List<System> result = service.findByDeviceId(deviceId);
+
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+
+		verify(deviceRepository).findById(deviceId);
+		verify(systemRepo, never()).findAllByDevice(any(Device.class));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFindByDeviceIdOk() {
+		final String uuid = "2f0a6b4d-3207-4eec-8694-b44780f18182";
+		final UUID deviceId = UUID.fromString(uuid);
+		final Device device = new Device(deviceId, "localhost", 12345, true, false);
+		final System sys = new System("TestSystem", device);
+		sys.setId(1L);
+
+		when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
+		when(systemRepo.findAllByDevice(device)).thenReturn(List.of(sys));
+
+		final List<System> result = service.findByDeviceId(deviceId);
+
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		assertEquals(sys, result.get(0));
+
+		verify(deviceRepository).findById(deviceId);
+		verify(systemRepo).findAllByDevice(device);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDeleteSystemsWithoutDeviceInternalServerError() {
+		when(systemRepo.findAllByDeviceIsNull()).thenThrow(RuntimeException.class);
+
+		final Throwable ex = assertThrows(
+				InternalServerError.class,
+				() -> service.deleteSystemsWithoutDevice());
+
+		assertEquals("Database operation error", ex.getMessage());
+
+		verify(systemRepo).findAllByDeviceIsNull();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDeleteSystemsWithoutDeviceOk() {
+		final System sys = new System("TestSystem", null);
+		sys.setId(1L);
+
+		when(systemRepo.findAllByDeviceIsNull()).thenReturn(List.of(sys));
+		doNothing().when(systemRepo).deleteAll(List.of(sys));
+		doNothing().when(systemRepo).flush();
+
+		final int result = service.deleteSystemsWithoutDevice();
+
+		assertEquals(1, result);
+
+		verify(systemRepo).findAllByDeviceIsNull();
+		verify(systemRepo).deleteAll(List.of(sys));
+		verify(systemRepo).flush();
 	}
 }
