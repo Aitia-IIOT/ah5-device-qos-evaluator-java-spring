@@ -172,6 +172,11 @@ public class MeasurementEngine {
 				}
 			}
 
+			// new device without any address or empty hostname (not very likely)
+			if (deviceRecord == null) {
+				continue;
+			}
+
 			// Handle systems
 			final Set<String> deviceSystems = systemDeviceMap.getDeviceSystems(i);
 			final List<System> toSave = new ArrayList<>(deviceSystems.size());
@@ -183,8 +188,11 @@ public class MeasurementEngine {
 					toSave.add(sysRecord);
 				}
 			}
-			systemDbService.save(toSave);
-			toSave.clear();
+
+			if (!toSave.isEmpty()) {
+				systemDbService.save(toSave);
+				toSave.clear();
+			}
 
 			final List<System> systemRecords = systemDbService.findByNames(deviceSystems);
 			for (final String sysName : deviceSystems) {
@@ -199,12 +207,16 @@ public class MeasurementEngine {
 						break;
 					}
 				}
+
 				if (!systemExists) {
 					toSave.add(new System(sysName, deviceRecord));
 					newSysCnt++;
 				}
 			}
-			systemDbService.save(toSave);
+
+			if (!toSave.isEmpty()) {
+				systemDbService.save(toSave);
+			}
 		}
 
 		return newSysCnt;
@@ -218,7 +230,7 @@ public class MeasurementEngine {
 
 		for (final Address address : addresses) {
 			if (address.type() == AddressType.MAC) {
-				// not happens in theory
+				// does not happen in theory
 				continue;
 			}
 
