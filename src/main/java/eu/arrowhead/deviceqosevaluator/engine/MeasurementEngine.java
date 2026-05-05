@@ -253,7 +253,8 @@ public class MeasurementEngine {
 		Device selected = devices.getFirst();
 
 		if (devices.size() > 1) {
-			for (final Device device : devices) {
+			for (int i = 1; i < devices.size(); ++i) {
+				final Device device = devices.get(i);
 				if (selected.isInactive() && !device.isInactive()) {
 					selected = device;
 
@@ -276,5 +277,4 @@ public class MeasurementEngine {
 
 		return systemDbService.deleteSystemsWithoutDevice();
 	}
-
 }

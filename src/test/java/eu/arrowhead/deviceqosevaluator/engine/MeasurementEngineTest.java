@@ -18,11 +18,16 @@ package eu.arrowhead.deviceqosevaluator.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,6 +48,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import eu.arrowhead.common.Constants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.ArrowheadHttpService;
 import eu.arrowhead.deviceqosevaluator.engine.SystemDeviceMap.Address;
@@ -203,6 +209,228 @@ public class MeasurementEngineTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testArrangeDatabaseAndMeasurements3() throws SchedulerException {
+		final SystemDeviceMap map = new SystemDeviceMap();
+		final HashMap<Integer, Triple<Set<Address>, Set<String>, Bool>> devices = new HashMap<>();
+		final Bool boolTrue = new Bool();
+		boolTrue.setValue(true);
+		devices.put(0, Triple.of(
+				Set.of(new Address("10.0.0.1", AddressType.IPV4, false)),
+				Set.of("TestSystem"),
+				boolTrue));
+		ReflectionTestUtils.setField(map, "devices", devices);
+		final UUID deviceId = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device = new Device(deviceId, "10.0.0.1", null, true, false);
+		final System system = new System("TestSystem", device);
+
+		when(deviceDbService.findByAddresses(Set.of("10.0.0.1"))).thenReturn(List.of());
+		when(deviceDbService.create("10.0.0.1", true)).thenReturn(device);
+		doNothing().when(rttMeasurementJobScheduler).start(device);
+		doNothing().when(augmentedMeasurementJobScheduler).start(device);
+		when(systemDbService.findByDeviceId(deviceId)).thenReturn(List.of());
+		when(systemDbService.findByNames(Set.of("TestSystem"))).thenReturn(List.of());
+		doNothing().when(systemDbService).save(List.of(system));
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "arrangeDatabaseAndMeasurements", map);
+
+		assertEquals(1, resultObj);
+
+		verify(deviceDbService).findByAddresses(Set.of("10.0.0.1"));
+		verify(deviceDbService).create("10.0.0.1", true);
+		verify(rttMeasurementJobScheduler).start(device);
+		verify(augmentedMeasurementJobScheduler).start(device);
+		verify(systemDbService).findByDeviceId(deviceId);
+		verify(systemDbService).save(List.of(system));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testArrangeDatabaseAndMeasurements4() throws SchedulerException {
+		final SystemDeviceMap map = new SystemDeviceMap();
+		final HashMap<Integer, Triple<Set<Address>, Set<String>, Bool>> devices = new HashMap<>();
+		final Bool boolTrue = new Bool();
+		boolTrue.setValue(true);
+		devices.put(0, Triple.of(
+				Set.of(new Address("10.0.0.1", AddressType.IPV4, false)),
+				Set.of("TestSystem"),
+				boolTrue));
+		ReflectionTestUtils.setField(map, "devices", devices);
+		final UUID deviceId = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device = new Device(deviceId, "10.0.0.1", null, false, true);
+		final System system = new System("TestSystem", null);
+		system.setId(1L);
+		final Device updatedDevice = new Device(deviceId, "10.0.0.1", null, true, false);
+		final System system2 = new System("ObsoleteSystem", device);
+		system2.setId(2L);
+
+		when(deviceDbService.findByAddresses(Set.of("10.0.0.1"))).thenReturn(List.of(device));
+		when(deviceDbService.update(updatedDevice)).thenReturn(updatedDevice);
+		when(rttMeasurementJobScheduler.isScheduled(updatedDevice)).thenReturn(false);
+		doNothing().when(rttMeasurementJobScheduler).start(updatedDevice);
+		when(augmentedMeasurementJobScheduler.isScheduled(updatedDevice)).thenReturn(false);
+		doNothing().when(augmentedMeasurementJobScheduler).start(updatedDevice);
+		when(systemDbService.findByDeviceId(deviceId)).thenReturn(List.of(system2));
+		doAnswer(invocation -> {
+			final Object arg = invocation.getArgument(0);
+			assertEquals(List.of(system2), arg);
+
+			return null;
+		}).when(systemDbService).save(List.of(system2));
+		when(systemDbService.findByNames(Set.of("TestSystem"))).thenReturn(List.of(system));
+		doNothing().when(systemDbService).save(List.of(system));
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "arrangeDatabaseAndMeasurements", map);
+
+		assertEquals(0, resultObj);
+		assertEquals(updatedDevice, system.getDevice());
+		assertNull(system2.getDevice());
+
+		verify(deviceDbService).findByAddresses(Set.of("10.0.0.1"));
+		verify(deviceDbService, never()).create("10.0.0.1", true);
+		verify(deviceDbService).update(updatedDevice);
+		verify(rttMeasurementJobScheduler).isScheduled(updatedDevice);
+		verify(rttMeasurementJobScheduler).start(updatedDevice);
+		verify(augmentedMeasurementJobScheduler).isScheduled(updatedDevice);
+		verify(augmentedMeasurementJobScheduler).start(updatedDevice);
+		verify(systemDbService).findByDeviceId(deviceId);
+		verify(systemDbService).findByNames(Set.of("TestSystem"));
+		verify(systemDbService, atLeastOnce()).save(List.of(system)); // Unexpected JUnit behavior: it expects 2 saves with the same list, not with 2 different lists
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testArrangeDatabaseAndMeasurements5() throws SchedulerException {
+		final SystemDeviceMap map = new SystemDeviceMap();
+		final HashMap<Integer, Triple<Set<Address>, Set<String>, Bool>> devices = new HashMap<>();
+		final Bool boolTrue = new Bool();
+		boolTrue.setValue(true);
+		devices.put(0, Triple.of(
+				Set.of(new Address("10.0.0.1", AddressType.IPV4, false)),
+				Set.of("TestSystem"),
+				boolTrue));
+		ReflectionTestUtils.setField(map, "devices", devices);
+		final UUID deviceId = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device = new Device(deviceId, "10.0.0.1", null, true, false);
+		final System system = new System("TestSystem", device);
+		system.setId(1L);
+
+		when(deviceDbService.findByAddresses(Set.of("10.0.0.1"))).thenReturn(List.of(device));
+		when(rttMeasurementJobScheduler.isScheduled(device)).thenReturn(true);
+		when(augmentedMeasurementJobScheduler.isScheduled(device)).thenReturn(true);
+		when(systemDbService.findByDeviceId(deviceId)).thenReturn(List.of(system));
+		when(systemDbService.findByNames(Set.of("TestSystem"))).thenReturn(List.of(system));
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "arrangeDatabaseAndMeasurements", map);
+
+		assertEquals(0, resultObj);
+
+		verify(deviceDbService).findByAddresses(Set.of("10.0.0.1"));
+		verify(deviceDbService, never()).create("10.0.0.1", true);
+		verify(deviceDbService, never()).update(any(Device.class));
+		verify(rttMeasurementJobScheduler).isScheduled(device);
+		verify(rttMeasurementJobScheduler, never()).start(any(Device.class));
+		verify(augmentedMeasurementJobScheduler).isScheduled(device);
+		verify(augmentedMeasurementJobScheduler, never()).start(any(Device.class));
+		verify(systemDbService).findByDeviceId(deviceId);
+		verify(systemDbService).findByNames(Set.of("TestSystem"));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testArrangeDatabaseAndMeasurements6() throws SchedulerException {
+		final SystemDeviceMap map = new SystemDeviceMap();
+		final HashMap<Integer, Triple<Set<Address>, Set<String>, Bool>> devices = new HashMap<>();
+		devices.put(0, Triple.of(
+				Set.of(new Address("10.0.0.1", AddressType.IPV4, false)),
+				Set.of("TestSystem"),
+				new Bool()));
+		ReflectionTestUtils.setField(map, "devices", devices);
+		final UUID deviceId = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device = new Device(deviceId, "10.0.0.1", null, true, false);
+		final UUID otherDeviceId = UUID.fromString("1ddffcf8-a60c-489b-860e-1c4cb13048c1");
+		final Device otherDevice = new Device(otherDeviceId, "10.0.0.23", null, true, false);
+		final System system = new System("TestSystem", otherDevice);
+		system.setId(1L);
+		final Device updatedDevice = new Device(deviceId, "10.0.0.1", null, false, false);
+		final System system2 = new System("TestSystem2", otherDevice);
+		system2.setId(2L);
+
+		when(deviceDbService.findByAddresses(Set.of("10.0.0.1"))).thenReturn(List.of(device));
+		when(deviceDbService.update(updatedDevice)).thenReturn(updatedDevice);
+
+		when(rttMeasurementJobScheduler.isScheduled(device)).thenReturn(true);
+		when(augmentedMeasurementJobScheduler.isScheduled(device)).thenReturn(true);
+		doNothing().when(augmentedMeasurementJobScheduler).stop(List.of(updatedDevice));
+		when(systemDbService.findByDeviceId(deviceId)).thenReturn(List.of());
+		when(systemDbService.findByNames(Set.of("TestSystem"))).thenReturn(List.of(system2, system));
+		doNothing().when(systemDbService).save(List.of(system));
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "arrangeDatabaseAndMeasurements", map);
+
+		assertEquals(0, resultObj);
+		assertEquals(updatedDevice, system.getDevice());
+
+		verify(deviceDbService).findByAddresses(Set.of("10.0.0.1"));
+		verify(deviceDbService, never()).create("10.0.0.1", true);
+		verify(deviceDbService).update(updatedDevice);
+		verify(rttMeasurementJobScheduler).isScheduled(updatedDevice);
+		verify(rttMeasurementJobScheduler, never()).start(any(Device.class));
+		verify(augmentedMeasurementJobScheduler).isScheduled(updatedDevice);
+		verify(augmentedMeasurementJobScheduler).stop(List.of(updatedDevice));
+		verify(systemDbService).findByDeviceId(deviceId);
+		verify(systemDbService).findByNames(Set.of("TestSystem"));
+		verify(systemDbService).save(List.of(system));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testArrangeDatabaseAndMeasurements7() throws SchedulerException {
+		final SystemDeviceMap map = new SystemDeviceMap();
+		final HashMap<Integer, Triple<Set<Address>, Set<String>, Bool>> devices = new HashMap<>();
+		devices.put(0, Triple.of(
+				Set.of(new Address("10.0.0.1", AddressType.IPV4, false)),
+				Set.of("TestSystem"),
+				new Bool()));
+		ReflectionTestUtils.setField(map, "devices", devices);
+		final UUID deviceId = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device = new Device(deviceId, "10.0.0.1", null, true, false);
+		final UUID otherDeviceId = UUID.fromString("1ddffcf8-a60c-489b-860e-1c4cb13048c1");
+		final Device otherDevice = new Device(otherDeviceId, "10.0.0.23", null, true, false);
+		final System system = new System("TestSystem", otherDevice);
+		system.setId(1L);
+		final Device updatedDevice = new Device(deviceId, "10.0.0.1", null, false, false);
+		final System system2 = new System("TestSystem2", otherDevice);
+		system2.setId(2L);
+
+		when(deviceDbService.findByAddresses(Set.of("10.0.0.1"))).thenReturn(List.of(device));
+		when(deviceDbService.update(updatedDevice)).thenReturn(updatedDevice);
+
+		when(rttMeasurementJobScheduler.isScheduled(device)).thenReturn(true);
+		when(augmentedMeasurementJobScheduler.isScheduled(device)).thenReturn(false);
+		when(systemDbService.findByDeviceId(deviceId)).thenReturn(List.of());
+		when(systemDbService.findByNames(Set.of("TestSystem"))).thenReturn(List.of(system2, system));
+		doNothing().when(systemDbService).save(List.of(system));
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "arrangeDatabaseAndMeasurements", map);
+
+		assertEquals(0, resultObj);
+		assertEquals(updatedDevice, system.getDevice());
+
+		verify(deviceDbService).findByAddresses(Set.of("10.0.0.1"));
+		verify(deviceDbService, never()).create("10.0.0.1", true);
+		verify(deviceDbService).update(updatedDevice);
+		verify(rttMeasurementJobScheduler).isScheduled(updatedDevice);
+		verify(rttMeasurementJobScheduler, never()).start(any(Device.class));
+		verify(augmentedMeasurementJobScheduler).isScheduled(updatedDevice);
+		verify(augmentedMeasurementJobScheduler, never()).start(any(Device.class));
+		verify(augmentedMeasurementJobScheduler, never()).stop(anyList());
+		verify(systemDbService).findByDeviceId(deviceId);
+		verify(systemDbService).findByNames(Set.of("TestSystem"));
+		verify(systemDbService).save(List.of(system));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testSelectAddress1() {
 		final Address address1 = new Address("mac", AddressType.MAC, false);
 		final Address address2 = new Address("example.com", AddressType.HOSTNAME, false);
@@ -246,5 +474,106 @@ public class MeasurementEngineTest {
 		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "selectAddress", set);
 
 		assertEquals("10.0.0.14", resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice1() {
+		final UUID deviceUUID = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device = new Device(deviceUUID, "example.com", null, false, false);
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device));
+
+		assertEquals(device, resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice2() {
+		final UUID deviceUUID1 = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device1 = new Device(deviceUUID1, "example.com", null, false, true);
+
+		final UUID deviceUUID2 = UUID.fromString("4b4c4d76-c3e0-4dcc-82bb-ca3d06cc15fe");
+		final Device device2 = new Device(deviceUUID2, "example2.com", null, false, false);
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device1, device2));
+
+		assertEquals(device2, resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice3() {
+		final UUID deviceUUID1 = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device1 = new Device(deviceUUID1, "example.com", null, false, false);
+
+		final UUID deviceUUID2 = UUID.fromString("4b4c4d76-c3e0-4dcc-82bb-ca3d06cc15fe");
+		final Device device2 = new Device(deviceUUID2, "example2.com", null, false, true);
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device1, device2));
+
+		assertEquals(device1, resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice4() {
+		final UUID deviceUUID1 = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device1 = new Device(deviceUUID1, "example.com", null, false, false);
+
+		final UUID deviceUUID2 = UUID.fromString("4b4c4d76-c3e0-4dcc-82bb-ca3d06cc15fe");
+		final Device device2 = new Device(deviceUUID2, "example2.com", null, true, false);
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device1, device2));
+
+		assertEquals(device2, resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice5() {
+		final UUID deviceUUID1 = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device1 = new Device(deviceUUID1, "example.com", null, false, true);
+
+		final UUID deviceUUID2 = UUID.fromString("4b4c4d76-c3e0-4dcc-82bb-ca3d06cc15fe");
+		final Device device2 = new Device(deviceUUID2, "example2.com", null, true, true);
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device1, device2));
+
+		assertEquals(device2, resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice6() {
+		final ZonedDateTime timestamp = Utilities.utcNow();
+		final UUID deviceUUID1 = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device1 = new Device(deviceUUID1, "example.com", null, true, true);
+		device1.setCreatedAt(timestamp);
+
+		final UUID deviceUUID2 = UUID.fromString("4b4c4d76-c3e0-4dcc-82bb-ca3d06cc15fe");
+		final Device device2 = new Device(deviceUUID2, "example2.com", null, true, true);
+		device2.setCreatedAt(timestamp.plusMinutes(1));
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device1, device2));
+
+		assertEquals(device1, resultObj);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSpecifyDevice7() {
+		final ZonedDateTime timestamp = Utilities.utcNow();
+		final UUID deviceUUID1 = UUID.fromString("9ef06aec-7865-48c0-b456-9f6faab47c22");
+		final Device device1 = new Device(deviceUUID1, "example.com", null, false, false);
+		device1.setCreatedAt(timestamp.plusMinutes(1));
+
+		final UUID deviceUUID2 = UUID.fromString("4b4c4d76-c3e0-4dcc-82bb-ca3d06cc15fe");
+		final Device device2 = new Device(deviceUUID2, "example2.com", null, false, false);
+		device2.setCreatedAt(timestamp);
+
+		final Object resultObj = ReflectionTestUtils.invokeMethod(engine, "specifyDevice", List.of(device1, device2));
+
+		assertEquals(device2, resultObj);
 	}
 }
