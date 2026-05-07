@@ -31,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
@@ -55,7 +56,7 @@ public class StatisticsEngine {
 	@Autowired
 	private StatDbService statDbService;
 
-	private static final int hundred = 100;
+	private static final int HUNDRED = 100;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -65,6 +66,10 @@ public class StatisticsEngine {
 	//-------------------------------------------------------------------------------------------------
 	public List<SystemEvalModel> evaluate(final Set<String> systemNames, final List<OidMetricModel> metrics, final long timeWindow) {
 		logger.debug("evaluate started");
+		Assert.notNull(systemNames, "systemNames is null");
+		Assert.isTrue(!Utilities.containsNullOrEmpty(systemNames), "systemNames contains empty element");
+		Assert.notNull(metrics, "metrics is null");
+		Assert.isTrue(!Utilities.containsNull(metrics), "metrics contains null element");
 
 		final Map<UUID, List<SystemEvalModel>> deviceMap = new HashMap<>(systemNames.size());
 		final List<SystemEvalModel> unknownList = new ArrayList<>();
@@ -83,9 +88,15 @@ public class StatisticsEngine {
 
 			if (!found) {
 				final SystemEvalModel evalModel = new SystemEvalModel(sysName);
+				double score = 0.;
 				for (final OidMetricModel metric : metrics) {
 					evalModel.addNoStat(metric.getGroup());
+					// calculating score using specified weights and "worst" values
+					for (final Entry<OidMetric, Double> metricEntry : metric.getMetricWeight().entrySet()) {
+						score = score + calculateMetricScore(metricEntry.getKey(), metric.getScaleTo(), metricEntry.getValue(), List.of(), metric.getGroup().getWorstStat());
+					}
 				}
+				evalModel.setScore(score);
 				unknownList.add(evalModel);
 			}
 		}
@@ -124,7 +135,6 @@ public class StatisticsEngine {
 			for (final Entry<OidMetric, Double> metricEntry : metricModel.getMetricWeight().entrySet()) {
 				score = score + calculateMetricScore(metricEntry.getKey(), metricModel.getScaleTo(), metricEntry.getValue(), data, metricModel.getGroup().getWorstStat());
 			}
-
 		}
 
 		return score;
@@ -220,7 +230,7 @@ public class StatisticsEngine {
 		}
 
 		if (scaleTo != null) {
-			value = (value / scaleTo) * hundred;
+			value = (value / scaleTo) * HUNDRED;
 		}
 
 		return value;

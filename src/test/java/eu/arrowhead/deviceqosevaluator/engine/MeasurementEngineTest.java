@@ -17,6 +17,7 @@
 package eu.arrowhead.deviceqosevaluator.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -35,7 +36,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -106,8 +106,7 @@ public class MeasurementEngineTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("checkstyle:MagicNumber")
 	@Test
-	@Disabled
-	public void testOrganizeOk1() throws ArrowheadException, SchedulerException {
+	public void testOrganizeOk() throws ArrowheadException, SchedulerException {
 		ReflectionTestUtils.setField(engine, "working", false);
 		final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(1);
 		queryParams.put(Constants.VERBOSE, List.of(String.valueOf(true)));
@@ -116,9 +115,16 @@ public class MeasurementEngineTest {
 		final SystemResponseDTO sysResponse1 = new SystemResponseDTO("TestSystem", null, "1.0.0", List.of(address1), null, null, null);
 		final AddressDTO address2 = new AddressDTO("IPV4", "10.0.0.2");
 		final SystemResponseDTO sysResponse2 = new SystemResponseDTO("TestSystem2", null, "1.0.0", List.of(address2), null, null, null);
-		final SystemQueryRequestDTO sysRequest2 = new SystemQueryRequestDTO(new PageDTO(1, 1, null, null), null, null, null, null, null, null);
+		final SystemQueryRequestDTO sysRequest2 = new SystemQueryRequestDTO(new PageDTO(1, 2, null, null), null, null, null, null, null, null);
 		final AddressDTO address3 = new AddressDTO("IPV4", "10.0.0.1");
 		final SystemResponseDTO sysResponse3 = new SystemResponseDTO("TestSystem3", null, "1.0.0", List.of(address3), null, null, null);
+		final UUID deviceUuid1 = UUID.fromString("82b6d4db-71e4-4db0-a546-8d3250525570");
+		final Device device1 = new Device(deviceUuid1, "10.0.0.1", null, false, false);
+		final UUID deviceUuid2 = UUID.fromString("1fa30526-a3c5-45fb-aced-98bda87c70de");
+		final Device device2 = new Device(deviceUuid2, "10.0.0.2", null, false, false);
+		final System system1 = new System("TestSystem", device1);
+		final System system2 = new System("TestSystem2", device2);
+		final System system3 = new System("TestSystem3", device1);
 
 		when(ahHttpService.consumeService(
 				"serviceRegistryManagement",
@@ -133,10 +139,24 @@ public class MeasurementEngineTest {
 				sysRequest2,
 				queryParams)).thenReturn(new SystemListResponseDTO(List.of(sysResponse3), 3));
 		when(deviceDbService.findByAddresses(Set.of("10.0.0.1"))).thenReturn(List.of());
-
-		// TODO: continue after arrangeDatabaseAndMeasurements tests
+		when(deviceDbService.create("10.0.0.1", false)).thenReturn(device1);
+		doNothing().when(rttMeasurementJobScheduler).start(device1);
+		when(systemDbService.findByDeviceId(deviceUuid1)).thenReturn(List.of());
+		when(systemDbService.findByNames(Set.of("TestSystem", "TestSystem3"))).thenReturn(List.of());
+		doNothing().when(systemDbService).save(List.of(system1, system3));
+		when(deviceDbService.findByAddresses(Set.of("10.0.0.2"))).thenReturn(List.of());
+		when(deviceDbService.create("10.0.0.2", false)).thenReturn(device2);
+		doNothing().when(rttMeasurementJobScheduler).start(device2);
+		when(systemDbService.findByDeviceId(deviceUuid2)).thenReturn(List.of());
+		when(systemDbService.findByNames(Set.of("TestSystem2"))).thenReturn(List.of());
+		doNothing().when(systemDbService).save(List.of(system2));
+		when(systemDbService.deleteSystemsWithoutDevice()).thenReturn(1);
 
 		final Pair<Integer, Integer> result = engine.organize();
+
+		assertNotNull(result);
+		assertEquals(3, result.getFirst());
+		assertEquals(1, result.getSecond());
 
 		verify(ahHttpService).consumeService(
 				"serviceRegistryManagement",
@@ -151,6 +171,18 @@ public class MeasurementEngineTest {
 				sysRequest2,
 				queryParams);
 		verify(deviceDbService).findByAddresses(Set.of("10.0.0.1"));
+		verify(deviceDbService).create("10.0.0.1", false);
+		verify(rttMeasurementJobScheduler).start(device1);
+		verify(systemDbService).findByDeviceId(deviceUuid1);
+		verify(systemDbService).findByNames(Set.of("TestSystem", "TestSystem3"));
+		verify(systemDbService).save(List.of(system1, system3));
+		verify(deviceDbService).findByAddresses(Set.of("10.0.0.2"));
+		verify(deviceDbService).create("10.0.0.2", false);
+		verify(rttMeasurementJobScheduler).start(device2);
+		verify(systemDbService).findByDeviceId(deviceUuid2);
+		verify(systemDbService).findByNames(Set.of("TestSystem2"));
+		verify(systemDbService).save(List.of(system2));
+		verify(systemDbService).deleteSystemsWithoutDevice();
 	}
 
 	//-------------------------------------------------------------------------------------------------
