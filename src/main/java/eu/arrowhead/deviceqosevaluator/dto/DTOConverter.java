@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
@@ -35,11 +36,17 @@ public class DTOConverter {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSDeviceStatQueryResponseDTO convertStatQueryResultModelPageToDTO(final Page<StatQueryResultModel> page, final Set<OidMetric> metricsNeeded) {
+		Assert.notNull(page, "page is null");
+		Assert.notNull(metricsNeeded, "metricsNeeded is null");
+
 		return new QoSDeviceStatQueryResponseDTO(page.stream().map(m -> convertStatQueryResultModelToDTO(m, metricsNeeded)).toList(), page.getTotalElements());
 	}
 
+	//=================================================================================================
+	// assistant methods
+
 	//-------------------------------------------------------------------------------------------------
-	public QoSDeviceStatRecordDTO convertStatQueryResultModelToDTO(final StatQueryResultModel model, final Set<OidMetric> metricsNeeded) {
+	private QoSDeviceStatRecordDTO convertStatQueryResultModelToDTO(final StatQueryResultModel model, final Set<OidMetric> metricsNeeded) {
 		return new QoSDeviceStatRecordDTO(
 				model.group().name(),
 				model.stat().getId(),
