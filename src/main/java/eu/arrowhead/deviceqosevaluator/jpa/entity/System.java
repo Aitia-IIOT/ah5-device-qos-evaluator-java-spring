@@ -52,6 +52,12 @@ public class System extends ArrowheadEntity {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return "System [id=" + id + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", name=" + name + ", device=" + device + "]";
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public String getName() {
 		return name;
 	}
@@ -70,5 +76,4 @@ public class System extends ArrowheadEntity {
 	public void setDevice(final Device device) {
 		this.device = device;
 	}
-
 }

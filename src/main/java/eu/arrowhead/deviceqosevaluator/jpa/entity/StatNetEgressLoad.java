@@ -36,4 +36,11 @@ public class StatNetEgressLoad extends StatEntity {
 	public StatNetEgressLoad(final UUID uuid, final ZonedDateTime timestamp, final double minimum, final double maximum, final double mean, final double median, final double current) {
 		super(uuid, timestamp, minimum, maximum, mean, median, current);
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return "StatNetEgressLoad [id=" + id + ", uuid=" + uuid + ", timestamp=" + timestamp + ", minimum=" + minimum + ", maximum=" + maximum + ", mean=" + mean + ", median=" + median
+				+ ", current=" + current + "]";
+	}
 }

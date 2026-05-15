@@ -45,7 +45,7 @@ public class QualityEvaluationNormalization {
 
 	private static final double TOLERANCE_BOTTOM = 0.9;
 	private static final double TOLERANCE_TOP = 1.1;
-	
+
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	//=================================================================================================
@@ -85,9 +85,9 @@ public class QualityEvaluationNormalization {
 			final double w = 1.0 / size;
 			return Collections.nCopies(size, w);
 		}
-		
+
 		Assert.isTrue(!Utilities.containsNull(weights), "metric weights list contains empty element");
-		
+
 		double sum = 0;
 		for (final Double w : weights) {
 			sum += w;
@@ -108,7 +108,7 @@ public class QualityEvaluationNormalization {
 	//-------------------------------------------------------------------------------------------------
 	private int normalizeTimeWindow(final Integer window) {
 		logger.debug("normalizeTimeWindow started");
-		
+
 		if (window == null) {
 			return (int) sysInfo.getEvaluationTimeWindow();
 		}

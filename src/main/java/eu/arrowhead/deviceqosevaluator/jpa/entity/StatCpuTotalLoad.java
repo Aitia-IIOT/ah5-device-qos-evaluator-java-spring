@@ -36,4 +36,11 @@ public class StatCpuTotalLoad extends StatEntity {
 	public StatCpuTotalLoad(final UUID uuid, final ZonedDateTime timestamp, final double minimum, final double maximum, final double mean, final double median, final double current) {
 		super(uuid, timestamp, minimum, maximum, mean, median, current);
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return "StatCpuTotalLoad [id=" + id + ", uuid=" + uuid + ", timestamp=" + timestamp + ", minimum=" + minimum + ", maximum=" + maximum + ", mean=" + mean + ", median=" + median
+				+ ", current=" + current + "]";
+	}
 }
