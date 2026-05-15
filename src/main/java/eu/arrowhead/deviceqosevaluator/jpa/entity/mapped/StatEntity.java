@@ -18,6 +18,7 @@ package eu.arrowhead.deviceqosevaluator.jpa.entity.mapped;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -76,6 +77,32 @@ public abstract class StatEntity {
 		this.mean = mean;
 		this.median = median;
 		this.current = current;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj == null) {
+			return false;
+		}
+
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+
+		final StatEntity other = (StatEntity) obj;
+
+		return id == other.id;
 	}
 
 	//=================================================================================================

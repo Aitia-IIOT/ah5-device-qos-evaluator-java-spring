@@ -18,6 +18,7 @@ package eu.arrowhead.deviceqosevaluator.jpa.entity;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import eu.arrowhead.common.Utilities;
@@ -155,5 +156,31 @@ public class Device {
 	//-------------------------------------------------------------------------------------------------
 	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj == null) {
+			return false;
+		}
+
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+
+		final Device other = (Device) obj;
+
+		return Objects.equals(id, other.id);
 	}
 }
