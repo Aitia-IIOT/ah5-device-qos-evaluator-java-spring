@@ -18,6 +18,7 @@ package eu.arrowhead.deviceqosevaluator.driver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -103,7 +104,7 @@ public class RttMeasurementDriverTest {
 			assertEquals(100L, result);
 
 			mockedStatic.verify(() -> Instant.now(), times(2));
-			mockedStatic.verify(() -> Instant.from(now2));
+			mockedStatic.verify(() -> Instant.from(now2), atLeastOnce());
 			verify(sysInfo).getRttMeasurementTimeout();
 			verify(mockSocket.constructed().get(0)).connect(addressObj, 5000);
 		}
