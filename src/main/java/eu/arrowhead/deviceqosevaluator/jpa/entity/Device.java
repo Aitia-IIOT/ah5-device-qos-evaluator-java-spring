@@ -89,6 +89,13 @@ public class Device {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return "Device [id=" + id + ", address=" + address + ", rttPort=" + rttPort + ", augmented=" + augmented + ", inactive=" + inactive + ", createdAt=" + createdAt
+				+ ", updatedAt=" + updatedAt + "]";
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public UUID getId() {
 		return id;
 	}
