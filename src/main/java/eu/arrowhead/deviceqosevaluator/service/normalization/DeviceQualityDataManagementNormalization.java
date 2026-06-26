@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.service.validation.name.SystemNameNormalizer;
@@ -43,6 +44,8 @@ public class DeviceQualityDataManagementNormalization {
 	//-------------------------------------------------------------------------------------------------
 	public QoSDeviceStatQueryRequestDTO normalizeQoSDeviceStatQueryRequestDTO(final QoSDeviceStatQueryRequestDTO dto) {
 		logger.debug("normalizeQoSDeviceStatQueryRequestDTO");
+		Assert.notNull(dto, "dto is null");
+		Assert.notNull(dto.metricGroup(), "metric group is null");
 
 		return new QoSDeviceStatQueryRequestDTO(
 				dto.pagination(),

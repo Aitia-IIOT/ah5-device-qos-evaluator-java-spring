@@ -50,9 +50,7 @@ public class RttMeasurementDriver {
 			try {
 				socket.connect(socketAddress, sysInfo.getRttMeasurementTimeout());
 
-				// port open
-				socket.close();
-
+				// we need a closed port for measuring => do nothing
 			} catch (final ConnectException ex) {
 				// port closed
 				result = Duration.between(start, Instant.now()).toMillis();

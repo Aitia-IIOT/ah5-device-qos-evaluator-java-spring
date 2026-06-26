@@ -18,6 +18,7 @@ package eu.arrowhead.deviceqosevaluator.service.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import eu.arrowhead.deviceqosevaluator.enums.OidGroup;
 import eu.arrowhead.deviceqosevaluator.enums.OidMetric;
@@ -53,5 +54,31 @@ public class OidMetricModel {
 	//-------------------------------------------------------------------------------------------------
 	public Map<OidMetric, Double> getMetricWeight() {
 		return metricWeight;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(group, metricWeight, scaleTo);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj == null) {
+			return false;
+		}
+
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+
+		final OidMetricModel other = (OidMetricModel) obj;
+
+		return group == other.group && Objects.equals(metricWeight, other.metricWeight) && Objects.equals(scaleTo, other.scaleTo);
 	}
 }

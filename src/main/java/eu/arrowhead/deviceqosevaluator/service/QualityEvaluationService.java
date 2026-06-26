@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +75,7 @@ public class QualityEvaluationService {
 	//-------------------------------------------------------------------------------------------------
 	public QoSEvaluationFilterResponseDTO filter(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("filter started");
+		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		try {
 			final List<String> systems = dto == null ? null : dto.providers();
@@ -99,7 +101,6 @@ public class QualityEvaluationService {
 			}
 
 			return new QoSEvaluationFilterResponseDTO(passedProviders, droppedProviders, warnings);
-
 		} catch (final JsonProcessingException ex) {
 			throw new InvalidParameterException("Invalid configuration payload", origin);
 		}
@@ -108,6 +109,7 @@ public class QualityEvaluationService {
 	//-------------------------------------------------------------------------------------------------
 	public QoSEvaluationSortResponseDTO sort(final QoSEvaluationRequestDTO dto, final String origin) {
 		logger.debug("sort started");
+		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		try {
 			final List<String> systems = dto == null ? null : dto.providers();
@@ -119,7 +121,7 @@ public class QualityEvaluationService {
 			final List<String> sortedProviders = new ArrayList<>();
 			final Map<String, List<String>> warnings = new HashMap<>();
 
-			evaluated.sort(Comparator.comparingDouble(SystemEvalModel::getScore)); //ascending
+			evaluated.sort(Comparator.comparingDouble(SystemEvalModel::getScore)); // ascending
 			for (final SystemEvalModel sysResult : evaluated) {
 				sortedProviders.add(sysResult.getName());
 				if (!Utilities.isEmpty(sysResult.getNoStat())) {
@@ -128,7 +130,6 @@ public class QualityEvaluationService {
 			}
 
 			return new QoSEvaluationSortResponseDTO(sortedProviders, warnings);
-
 		} catch (final JsonProcessingException ex) {
 			throw new InvalidParameterException("Invalid configuration payload", origin);
 		}

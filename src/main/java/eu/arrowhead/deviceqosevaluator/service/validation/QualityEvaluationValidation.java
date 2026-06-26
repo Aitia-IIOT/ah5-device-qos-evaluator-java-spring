@@ -45,7 +45,7 @@ public class QualityEvaluationValidation {
 	private DeviceQoSEvaluatorSystemInfo sysInfo;
 
 	@Autowired
-	private QualityEvaluationNormalization normalizator;
+	private QualityEvaluationNormalization normalizer;
 
 	@Autowired
 	private SystemNameValidator systemNameValidator;
@@ -66,8 +66,7 @@ public class QualityEvaluationValidation {
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		validateQoSEvaluationRequest(systems, config, needThreshold, origin);
-		final List<String> normalizedSystemNames = normalizator.normalizeSystemNames(systems);
-		final QoSDeviceDataEvaluationConfigDTO normalizedConfig = normalizator.normalizeQoSDeviceDataEvaluationConfigDTO(config);
+		final List<String> normalizedSystemNames = normalizer.normalizeSystemNames(systems);
 
 		try {
 			for (final String provider : normalizedSystemNames) {
@@ -77,6 +76,7 @@ public class QualityEvaluationValidation {
 			throw new InvalidParameterException(ex.getMessage(), origin);
 		}
 
+		final QoSDeviceDataEvaluationConfigDTO normalizedConfig = normalizer.normalizeQoSDeviceDataEvaluationConfigDTO(config);
 		for (final String metricName : normalizedConfig.metricNames()) {
 			final int splitIdx = metricName.lastIndexOf(DeviceQoSEvaluatorConstants.OID_NAME_DELIMITER);
 			if (splitIdx <= 0 || splitIdx == metricName.length() - 1) {
@@ -123,7 +123,7 @@ public class QualityEvaluationValidation {
 
 		if (!Utilities.isEmpty(config.metricWeights())) {
 			if (Utilities.containsNull(config.metricWeights())) {
-				throw new InvalidParameterException("Metric weights configuration contains empty element", origin);
+				throw new InvalidParameterException("Metric weights configuration contains null element", origin);
 			}
 
 			if (config.metricNames().size() != config.metricWeights().size()) {

@@ -67,8 +67,13 @@ public class AugmentedMeasurementDriver {
 	//-------------------------------------------------------------------------------------------------
 	public AugmentedMeasurementsDTO fetch(final String address) {
 		final UriComponents uri = HttpUtilities.createURI(Constants.HTTP, address, DeviceQoSEvaluatorConstants.AUGMENTED_MEASUREMENT_PORT, path, paramKey, batchSize);
-		final RequestBodySpec spec = client.method(HttpMethod.GET).uri(uri.toUri());
-		return spec.retrieve().bodyToMono(AugmentedMeasurementsDTO.class).block(Duration.ofMillis(socketTimeout));
+		final RequestBodySpec spec = client
+				.method(HttpMethod.GET)
+				.uri(uri.toUri());
+		return spec
+				.retrieve()
+				.bodyToMono(AugmentedMeasurementsDTO.class)
+				.block(Duration.ofMillis(socketTimeout));
 	}
 
 	//=================================================================================================
@@ -77,7 +82,8 @@ public class AugmentedMeasurementDriver {
 	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
 	private void init() {
-		final HttpClient httpCLient = HttpClient.create()
+		final HttpClient httpCLient = HttpClient
+				.create()
 				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
 				.doOnConnected(this::initConnectionHandlers);
 
