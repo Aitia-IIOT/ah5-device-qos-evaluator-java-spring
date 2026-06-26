@@ -59,7 +59,7 @@ public class DeviceQualityDataManagementValidation {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSDeviceStatQueryRequestDTO validateAndNormalizeQueryRequest(final QoSDeviceStatQueryRequestDTO dto, final String origin) {
-		logger.debug("validateAndNormalizeQueryRequest");
+		logger.debug("validateAndNormalizeQueryRequest started");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
 		validateQueryRequest(dto, origin);
@@ -120,7 +120,7 @@ public class DeviceQualityDataManagementValidation {
 
 	//-------------------------------------------------------------------------------------------------
 	private void validateQueryRequest(final QoSDeviceStatQueryRequestDTO dto, final String origin) {
-		logger.debug("validateQueryRequest");
+		logger.debug("validateQueryRequest started");
 
 		if (dto == null) {
 			throw new InvalidParameterException("Request payload is missing", origin);

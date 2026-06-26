@@ -25,7 +25,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InternalServerError;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
@@ -54,6 +56,8 @@ public class SystemDbService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void save(final Iterable<System> systems) {
 		logger.debug("save started");
+		Assert.notNull(systems, "systems is null");
+		Assert.isTrue(!Utilities.containsNull(systems), "systems contains null");
 
 		try {
 			systemRepo.saveAllAndFlush(systems);
@@ -67,6 +71,8 @@ public class SystemDbService {
 	//-------------------------------------------------------------------------------------------------
 	public List<System> findByNames(final Iterable<String> names) {
 		logger.debug("findByNames started");
+		Assert.notNull(names, "names is null");
+		Assert.isTrue(!Utilities.containsNullOrEmpty(names), "names contains empty element");
 
 		try {
 			return systemRepo.findAllByNameIn(names);
@@ -80,6 +86,7 @@ public class SystemDbService {
 	//-------------------------------------------------------------------------------------------------
 	public List<System> findByDeviceId(final UUID deviceId) {
 		logger.debug("findByDeviceId started");
+		Assert.notNull(deviceId, "deviceId is null");
 
 		try {
 			final Optional<Device> optional = deviceRepository.findById(deviceId);

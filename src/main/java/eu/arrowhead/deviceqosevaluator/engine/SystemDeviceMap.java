@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
@@ -97,19 +98,19 @@ public class SystemDeviceMap {
 	private Set<Address> collectAddresses(final SystemResponseDTO system) {
 		logger.debug("collectAddresses started");
 
-		final Set<Address> addresses = new HashSet<>(system.addresses().size());
-		for (final AddressDTO addr : system.addresses()) {
-			if (Utilities.isEnumValue(addr.type(), AddressType.class)) {
-				addresses.add(new Address(addr.address(), AddressType.valueOf(addr.type()), false));
-			}
-		}
-
+		final Set<Address> addresses = new HashSet<>(system.addresses().size() + (system.device() == null ? 0 : system.device().addresses().size()));
 		if (system.device() != null) {
 			for (final AddressDTO addr : system.device().addresses()) {
 				if (Utilities.isEnumValue(addr.type(), AddressType.class)
 						&& !addr.type().equalsIgnoreCase(AddressType.MAC.name())) {
 					addresses.add(new Address(addr.address(), AddressType.valueOf(addr.type()), true));
 				}
+			}
+		}
+
+		for (final AddressDTO addr : system.addresses()) {
+			if (Utilities.isEnumValue(addr.type(), AddressType.class)) {
+				addresses.add(new Address(addr.address(), AddressType.valueOf(addr.type()), false));
 			}
 		}
 
@@ -147,6 +148,10 @@ public class SystemDeviceMap {
 				final List<String> list = (List<String>) object;
 				for (final String item : list) {
 					for (final OidGroup oidGroup : OidGroup.values()) {
+						if (OidGroup.RTT == oidGroup) {
+							continue;
+						}
+
 						if (item.equals(oidGroup.getValue())) {
 							return true;
 						}
@@ -163,17 +168,52 @@ public class SystemDeviceMap {
 	//=================================================================================================
 	// nested record
 
+	//-------------------------------------------------------------------------------------------------
 	protected record Address(String address, AddressType type, boolean deviceRelated) {
+
+		//=================================================================================================
+		// methods
+
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public int hashCode() {
+			return Objects.hash(address, type);
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+
+			if (obj == null) {
+				return false;
+			}
+
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+
+			final Address other = (Address) obj;
+
+			return Objects.equals(address, other.address) && type == other.type;
+		}
 	}
 
 	//=================================================================================================
 	// nested class
-	private final class Bool {
+
+	//-------------------------------------------------------------------------------------------------
+	static final class Bool {
 
 		//=================================================================================================
 		// members
 
 		private boolean value = false;
+
+		//=================================================================================================
+		// methods
 
 		//-------------------------------------------------------------------------------------------------
 		public boolean getValue() {

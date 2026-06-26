@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorConstants;
 import eu.arrowhead.deviceqosevaluator.DeviceQoSEvaluatorSystemInfo;
 import eu.arrowhead.deviceqosevaluator.jpa.entity.Device;
@@ -93,10 +94,13 @@ public class AugmentedMeasurementJobScheduler {
 	public void stop(final List<Device> devices) throws SchedulerException {
 		logger.debug("AugmentedMeasurementJobScheduler.stop started");
 		Assert.notNull(devices, "device list is null");
+		Assert.isTrue(!Utilities.containsNull(devices), "device list contains null");
 
 		for (final Device device : devices) {
-			scheduler.unscheduleJob(TriggerKey.triggerKey(device.getId().toString() + triggerSuffix));
-			scheduler.deleteJob(JobKey.jobKey(device.getId().toString() + jobSuffix));
+			if (device.getId() != null) {
+				scheduler.unscheduleJob(TriggerKey.triggerKey(device.getId().toString() + triggerSuffix));
+				scheduler.deleteJob(JobKey.jobKey(device.getId().toString() + jobSuffix));
+			}
 		}
 	}
 
@@ -104,7 +108,7 @@ public class AugmentedMeasurementJobScheduler {
 	public boolean isScheduled(final Device device) throws SchedulerException {
 		logger.debug("AugmentedMeasurementJobScheduler.isScheduled started");
 		Assert.notNull(device, "device is null");
-		Assert.notNull(device.getId(), "device is is null");
+		Assert.notNull(device.getId(), "device id is null");
 
 		return scheduler.checkExists(JobKey.jobKey(device.getId().toString() + jobSuffix));
 	}
